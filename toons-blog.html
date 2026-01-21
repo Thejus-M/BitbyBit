@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding TOONs — Bit by Bit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Share+Tech+Mono&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      /* --- DESIGN SYSTEM FROM BB.HTML --- */
+      
+      /* Light Theme (Default) */
+      --accent: #2A5D9C;
+      --accent-hover: #1e4575;
+      --accent-soft: rgba(42, 93, 156, 0.12);
+      --accent-bright: #2A5D9C;
+      --accent-glow: rgba(42, 93, 156, 0.3);
+
+      --bg-body: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-elevated: #ffffff;
+      --text-main: #111111;
+      --text-sub: #666666;
+      --text-code: #111111;
+      
+      --border: #E5E5E5;
+      --border-sub: #e0e0e0;
+      --grid-line: #e0ecf8;
+
+      /* --- FONTS --- */
+      --font-serif: 'EB Garamond', Georgia, serif;
+      --font-main: 'Inter', sans-serif;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono-sys: 'Share Tech Mono', monospace;
+      --font-mono-code: 'JetBrains Mono', monospace;
+      --font-pixel: 'Press Start 2P', cursive;
+    }
+
+
+    [data-theme="dark"] {
+      --accent: #5682B1;
+      --accent-hover: #739EC9;
+      --accent-soft: rgba(86, 130, 177, 0.2);
+      --accent-bright: #739EC9;
+      --accent-glow: rgba(86, 130, 177, 0.3);
+
+      --bg-body: #000000;
+      --bg-card: #000000;
+      --bg-card-elevated: #0a0e14;
+      --text-main: #739EC9;
+      --text-sub: #5682B1;
+      --text-code: #739EC9;
+      
+      --border: #5682B1;
+      --border-sub: #3d5e80;
+      --grid-line: #142030;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      line-height: 1.6;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* HEADER */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      background: var(--bg-card);
+      z-index: 500;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 20px rgba(0, 212, 255, 0.05);
+    }
+
+    .header-brand {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .brand-logo-text {
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      position: relative;
+      transition: all 0.3s ease;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-logo-text:hover {
+      transform: scale(1.05);
+    }
+
+    [data-theme="dark"] .brand-logo-text {
+      color: var(--accent-bright);
+    }
+
+    .brand-connector {
+      color: var(--text-sub);
+      font-size: 10px;
+      font-family: var(--font-mono-sys);
+      text-transform: lowercase;
+      font-weight: 300;
+      letter-spacing: 0;
+    }
+
+    .header-status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-tagline {
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    #themeToggle {
+      background: none;
+      border: 1px solid var(--border);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #themeToggle:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    #themeToggle svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--text-sub);
+    }
+
+    /* PAGE LAYOUT */
+    .page-wrapper {
+      padding-top: 60px;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* NEW HERO SECTION (Full Width) */
+    .hero-section {
+      padding: 100px 40px 80px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(77, 159, 255, 0.03) 0%, transparent 100%);
+    }
+
+    .hero-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 55% 1fr; /* Slightly tighter text column */
+      gap: 80px;
+      align-items: start; /* Align to top to let columns flow naturally */
+    }
+
+    /* Hero Text Side */
+    .hero-meta-top {
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 32px;
+      display: inline-block;
+      border: 1px solid var(--accent-soft);
+      padding: 6px 12px;
+      background: var(--bg-card-elevated);
+      border-radius: 0;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 5rem;
+      font-weight: 700;
+      line-height: 0.9;
+      color: var(--text-main);
+      margin-bottom: 40px;
+      letter-spacing: -2px;
+      text-transform: uppercase;
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+      max-width: 95%;
+      margin-bottom: 0; /* Metadata moved away */
+    }
+
+    /* Hero Visual Side (Image + Metadata) */
+    .hero-visual-side {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      padding-top: 10px;
+    }
+
+    .hero-image-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* More vivid placeholder */
+    .hero-placeholder-art {
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 80% 20%, var(--accent-soft) 0%, transparent 40%),
+        linear-gradient(0deg, var(--bg-card) 0%, transparent 100%),
+        repeating-linear-gradient(45deg, var(--border-sub) 0px, var(--border-sub) 1px, transparent 1px, transparent 10px);
+      background-size: 100% 100%, 100% 50%, 20px 20px;
+      opacity: 0.8; 
+      position: relative;
+    }
+    
+    .hero-placeholder-art::before {
+       /* Faux UI element */
+       content: "";
+       position: absolute;
+       top: 50%; left: 50%;
+       transform: translate(-50%, -50%);
+       width: 80px; height: 80px;
+       border: 1px dashed var(--accent);
+       border-radius: 50%;
+       animation: spin 10s linear infinite;
+    }
+
+    @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    .hero-placeholder-art::after {
+        content: "SYS.VISUAL // TOONS_MODEL";
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        font-family: var(--font-mono-sys);
+        color: var(--accent);
+        font-size: 10px;
+        letter-spacing: 2px;
+        border: 1px solid var(--accent);
+        padding: 4px 8px;
+        background: var(--bg-body);
+        box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Metadata moved to Right Column */
+    .hero-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px 40px;
+      padding: 24px;
+      border-top: 1px solid var(--border-sub);
+      border-bottom: 1px solid var(--border-sub);
+      background: rgba(77, 159, 255, 0.02);
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .meta-label {
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Removed dot ::before */
+
+    .meta-icon {
+      width: 12px;
+      height: 12px;
+      stroke: var(--accent);
+    }
+
+    .meta-value {
+      font-family: var(--font-mono-sys);
+      font-size: 12px;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    [data-theme="light"] .meta-value {
+      font-weight: 600;
+      color: #000;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      color: var(--text-main);
+      background: var(--bg-card-elevated);
+      border: 1px solid var(--border-sub);
+      padding: 3px 8px;
+    }
+
+
+    /* CONTENT LAYOUT Grid */
+    .content-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 60px;
+      padding: 60px 40px 0px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* LEFT SIDEBAR - STICKY TOC */
+    .meta-sidebar {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      padding-right: 20px;
+    }
+
+    /* Animated Small Title */
+    .sidebar-mini-header {
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .meta-sidebar.scrolled .sidebar-mini-header {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .mini-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-main);
+      line-height: 1.2;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .mini-badge {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    /* TOC */
+    .toc-container {
+      padding-top: 20px;
+      border-top: 1px solid var(--border-sub);
+    }
+
+    .toc-label {
+        font-family: var(--font-mono-sys);
+        font-size: 10px;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .toc-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .toc-link {
+      font-family: var(--font-main);
+      font-size: 14px;
+      color: var(--text-sub);
+      text-decoration: none;
+      display: flex;
+      align-items: baseline;
+      padding: 6px 0;
+      gap: 12px;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .toc-link::before {
+      content: "+";
+      color: var(--text-sub);
+      font-family: var(--font-mono-sys);
+      font-size: 14px;
+      flex-shrink: 0;
+      width: 12px;
+      transition: color 0.2s;
+      opacity: 0.6;
+    }
+
+    .toc-link:hover {
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .toc-link:hover::before {
+      color: var(--accent);
+      opacity: 1;
+    }
+
+    .toc-link.active {
+      color: var(--accent);
+      font-weight: 600;
+      transform: translateX(4px);
+    }
+
+    .toc-link.active::before {
+      content: "→";
+      color: var(--accent);
+      opacity: 1;
+    }
+
+    /* MAIN CONTENT COLUMN */
+    .main-column {
+      min-width: 0;
+      max-width: 100%;
+      padding-right: 40px;
+      padding-left: 60px;
+    }
+
+    .article-content {
+      max-width: 1000px;
+    }
+
+    .article-content h2 {
+      font-family: var(--font-mono-sys);
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-top: 60px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: 120px;
+    }
+
+    .article-content h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-top: 40px;
+      margin-bottom: 20px;
+      letter-spacing: -0.5px;
+      scroll-margin-top: 120px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .article-content p {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: var(--text-main);
+      margin-bottom: 32px;
+    }
+
+    [data-theme="light"] .article-content p {
+      color: #050505;
+      font-weight: 500;
+    }
+
+    .article-content strong {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .article-content em {
+      font-style: italic;
+      color: var(--text-sub);
+    }
+
+    .code-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 32px;
+      margin: 40px 0;
+      position: relative;
+      max-width: 100%;
+      overflow-x: auto;
+      box-sizing: border-box;
+    }
+
+    [data-theme="light"] .code-block {
+      background: #F5F5F0;
+      border: 1px solid #e0e0e0;
+    }
+
+    .code-label {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      display: block;
+      opacity: 0.7;
+    }
+
+    .code-block code {
+      font-family: var(--font-mono-code);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-code);
+      display: block;
+      overflow-x: auto;
+    }
+
+    .code-keyword { color: var(--accent); font-weight: 600; }
+    .code-comment { color: var(--text-sub); font-style: italic; }
+
+    [data-theme="light"] .code-block code { color: #2a2a2a; }
+
+    /* Callouts */
+    .callout {
+      background: var(--bg-card);
+      border-top: 1px solid var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding: 32px;
+      margin: 40px 0;
+    }
+
+    [data-theme="light"] .callout { background: #FAFAF8; }
+
+    .callout-title {
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .article-content ul, .article-content ol {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: var(--text-main);
+      margin-bottom: 32px;
+      padding-left: 20px;
+    }
+
+    [data-theme="light"] .article-content ul,
+    [data-theme="light"] .article-content ol { color: #050505; font-weight: 500; }
+
+    .article-content li { margin-bottom: 12px; padding-left: 10px; }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 80px 0;
+    }
+
+    /* RECOMMENDATIONS */
+    .recommendations-section {
+      margin-top: 100px;
+      padding-top: 60px;
+      border-top: 1px solid var(--border);
+    }
+
+    .recommendations-header h2 {
+      font-family: var(--font-mono-sys);
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 40px;
+    }
+
+    .recommendations-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .rec-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 32px;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: block;
+      height: 100%;
+    }
+
+    [data-theme="light"] .rec-card { background: #FAFAF8; }
+
+    .rec-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .rec-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    [data-theme="light"] .rec-card h3 { color: #050505; }
+
+    .rec-excerpt {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .rec-meta {
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* FOOTER */
+    .simple-footer {
+      border-top: 1px solid var(--border);
+      padding: 80px 40px;
+      margin-top: 100px;
+      background: var(--bg-card);
+      position: relative;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .footer-home-mark {
+      font-family: var(--font-pixel);
+      font-size: 16px;
+      color: var(--accent);
+      text-decoration: none;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .footer-home-mark:hover {
+      transform: scale(1.1) translateY(-3px);
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+    }
+
+    .footer-home-mark::after {
+      content: ".";
+      color: var(--accent);
+    }
+    
+    .footer-info {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* RESPONSIVE */
+    /* 1. Large Laptops / Desktops (Default is > 1200px) */
+    @media (max-width: 1300px) {
+      .hero-title { font-size: 4rem; }
+      .content-layout { gap: 40px; }
+    }
+
+    /* 2. Tablet / Small Laptop (1024px) */
+    @media (max-width: 1024px) {
+      .hero-container { grid-template-columns: 1fr; gap: 40px; }
+      .hero-visual-side { order: 0; } /* Image below text for mobile */
+      .hero-image-wrapper { aspect-ratio: 16/9; }
+      
+      .content-layout { 
+        grid-template-columns: 1fr; 
+        gap: 40px; 
+        padding: 60px 40px 0px;
+      }
+      
+      /* Mobile: Hide sidebar completely (TOC/Mini Header) */
+      .meta-sidebar {
+        display: none;
+      }
+      
+      .sidebar-mini-header { display: none; }
+      .toc-container { display: none; } 
+      
+      .code-block { margin: 32px 0; }
+
+      /* Remove extra inner padding on single col layout */
+      .main-column {
+        padding-right: 0;
+        padding-left: 0;
+      }
+    }
+
+    /* 3. Small Screen / Large Phone (768px) */
+    @media (max-width: 768px) {
+      .header { padding: 0 20px; }
+
+      .hero-section { padding: 60px 20px 40px; }
+      .hero-title { font-size: 2.5rem; }
+      .hero-subtitle { font-size: 1.25rem; }
+
+      .content-layout { padding: 40px 20px 0; }
+      
+      .main-column { 
+        padding-right: 0; 
+        padding-left: 0; 
+      }
+
+      .recommendations-grid { grid-template-columns: 1fr; }
+      
+      /* Make meta grid more compact 2-col instead of 1 stack */
+      .hero-meta-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 20px 16px; 
+        padding: 20px 0; /* Remove side padding to align with edge */
+        border-left: none;
+        border-right: none;
+        background: transparent; /* Remove bg to look cleaner on mobile */
+      }
+      
+      .article-conteknt h2 { font-size: 1.35rem; margin-top: 40px; }
+    }
+
+    /* 4. Very Small Screen (480px) */
+    @media (max-width: 480px) {
+      .hero-title { 
+        font-size: 2rem; 
+        line-height: 1.1; 
+        word-break: break-word; /* Prevent overflow */
+      }
+      
+      .hero-subtitle { font-size: 1.1rem; }
+      
+      .header-tagline { display: none; } /* Save space in header */
+      .header-brand .brand-logo-text { font-size: 16px; }
+
+      .hero-section { padding: 40px 16px 30px; }
+      
+      .content-layout { 
+        padding: 30px 16px 0; 
+        gap: 20px;
+      }
+      
+      /* even tighter metadata */
+      .hero-meta-grid {
+        gap: 16px 12px;
+        padding: 16px 0;
+      }
+      .meta-label { font-size: 8px; }
+      .meta-value { font-size: 11px; }
+
+      .code-block { 
+        padding: 20px; 
+        margin: 24px -16px; /* Negative margin to stretch full width */
+        border-right: none; 
+        border-left: none;
+        border-radius: 0;
+      }
+      
+      .callout {
+        padding: 24px;
+        margin: 24px -16px;
+        border-right: none;
+        border-left: none;
+      }
+      
+      .simple-footer { padding: 60px 20px; }
+    }
+
+    /* Scroll Indicator */
+    .scroll-indicator {
+      position: fixed; top: 60px; left: 0; height: 3px;
+      background: var(--accent); width: 0%; z-index: 600;
+      transition: width 0.1s ease-out; box-shadow: 0 0 10px var(--accent-glow);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="scroll-indicator" id="scrollIndicator"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <a href="index.html" class="header-brand">
+      <span class="brand-logo-text">BIT<span class="brand-connector">by</span>BIT</span>
+    </a>
+    <div class="header-status">
+      <span class="header-tagline">
+        Breaking down tech <br> one bit at a time
+      </span>
+      <button id="themeToggle" title="Toggle Theme">
+        <svg id="iconSun" viewBox="0 0 24 24" style="display: block;">
+          <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
+        </svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" style="fill: none; stroke: var(--text-sub); stroke-width: 2; display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+    
+    <!-- NEW HERO SECTION -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-container">
+        <!-- TEXT SIDE -->
+        <div class="hero-text-side">
+          <span class="hero-meta-top">// DATA_FORMAT_REVOLUTION</span>
+          <h1 class="hero-title">TOON: The Data Format That Saves Tokens</h1>
+          <p class="hero-subtitle">
+            Token-Oriented Object Notation (TOON) is a new data format designed to be more efficient than JSON when communicating with Large Language Models.
+          </p>
+        </div>
+
+        <!-- VISUAL + DATA SIDE -->
+        <div class="hero-visual-side">
+            <div class="hero-image-wrapper">
+                <div class="hero-placeholder-art"></div>
+            </div>
+          
+            <!-- Metdata moved here to balance list -->
+            <div class="hero-meta-grid">
+                <div class="meta-item">
+                  <span class="meta-label">
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    Date
+                  </span>
+                  <span class="meta-value">2026.01.17</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Time
+                  </span>
+                  <span class="meta-value">12 Min Read</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    Series
+                  </span>
+                  <span class="meta-value">Bit by Bit</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                    Tags
+                  </span>
+                  <div class="tags-container">
+                    <span class="tag">AI / ML</span>
+                    <span class="tag">Deep Learning</span>
+                  </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTENT LAYOUT -->
+    <div class="content-layout">
+
+      <!-- LEFT SIDEBAR: Sticky TOC & Mini Header -->
+      <aside class="meta-sidebar" id="metaSidebar">
+        <!-- Hidden until scrolled past hero -->
+        <div class="sidebar-mini-header">
+          <div class="mini-badge">// NOW_READING</div>
+          <div class="mini-title">Understanding TOONs</div>
+        </div>
+
+        <nav class="toc-container">
+          <span class="toc-label">Contents</span>
+          <ul class="toc-list" id="tocList">
+            <li><a href="#intro" class="toc-link">Introduction</a></li>
+            <li><a href="#problem" class="toc-link">The JSON Problem</a></li>
+            <li><a href="#architecture" class="toc-link">How TOON Works</a></li>
+            <li><a href="#comparison" class="toc-link">JSON vs TOON</a></li>
+            <li><a href="#when-to-use" class="toc-link">When to Use TOON</a></li>
+            <li><a href="#limitations" class="toc-link">Limitations</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- RIGHT COLUMN: Main Article -->
+      <main class="main-column">
+        <div class="article-content">
+          <p id="intro">
+            If you've ever sent large datasets to a Large Language Model, you've likely noticed something frustrating: <strong>JSON is expensive</strong>. Every quote, brace, and repeated key name adds tokens, and tokens cost money. Enter <strong>TOON</strong>—Token-Oriented Object Notation—a leaner alternative designed specifically for LLM communication.
+          </p>
+
+          <p>
+            TOON isn't trying to replace JSON everywhere. It's simply asking: <em>if your main consumer is a language model, why waste tokens on decoration?</em> The result is a format that can cut token usage by up to <strong>50%</strong> for repetitive, structured data.
+          </p>
+
+          <div class="divider"></div>
+
+          <h2 id="problem">The JSON Problem</h2>
+
+          <p>
+            JSON is wonderful for APIs, configuration files, and human-readable data exchange. But when you're feeding it to an LLM, the verbosity becomes a liability:
+          </p>
+
+          <ul>
+            <li><strong>Repeated keys:</strong> Every object repeats the same field names</li>
+            <li><strong>Quotes everywhere:</strong> Strings wrapped in quotes add unnecessary tokens</li>
+            <li><strong>Structural overhead:</strong> Braces, commas, and colons that don't carry meaning for the model</li>
+          </ul>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Real Impact
+            </div>
+            <p style="margin-bottom: 0;">
+              In real-world tests with datasets of 12,000+ rows, TOON used <strong>roughly half the tokens</strong> compared to equivalent JSON, translating directly to lower API costs and faster processing.
+            </p>
+          </div>
+
+          <h2 id="architecture">How TOON Works</h2>
+
+          <p>
+            The core insight of TOON is simple: <strong>define the structure once, then just list the data</strong>. Instead of repeating field names for every object, TOON declares the schema upfront and treats the data like a compact table.
+          </p>
+
+          <div class="code-block">
+            <span class="code-label">// JSON Example (Verbose)</span>
+            <code>[
+  { <span class="code-keyword">"id"</span>: 1, <span class="code-keyword">"name"</span>: "Alice", <span class="code-keyword">"role"</span>: "admin" },
+  { <span class="code-keyword">"id"</span>: 2, <span class="code-keyword">"name"</span>: "Bob", <span class="code-keyword">"role"</span>: "user" }
+]</code>
+          </div>
+
+          <div class="code-block">
+            <span class="code-label">// TOON Example (Compact)</span>
+            <code><span class="code-keyword">users</span>[2]{id,name,role}:
+  1,Alice,admin
+  2,Bob,user</code>
+          </div>
+
+          <p>
+            The TOON format breaks down as: <code>listName[count]{field1,field2,...}</code> followed by rows of comma-separated values. It still supports nesting and complex structures, but without drowning you in punctuation.
+          </p>
+
+          <h2 id="comparison">Why Token Efficiency Matters</h2>
+          <p>
+            LLM providers charge by tokens, not by semantic value. When you send a JSON array with thousands of identical keys, you're paying for noise. TOON eliminates redundancy by declaring the schema once—the structure is obvious, so why repeat it?
+          </p>
+
+          <h2 id="when-to-use">When to Use TOON</h2>
+          <p>
+            TOON shines in specific scenarios:
+          </p>
+          <ul>
+            <li><strong>Large, repetitive datasets:</strong> User logs, transactions, event streams</li>
+            <li><strong>LLM prompts:</strong> When sending structured data as context to a model</li>
+            <li><strong>Token-sensitive applications:</strong> Where API costs are a concern</li>
+          </ul>
+
+          <p>
+            Stick to JSON when you're building APIs, storing data long-term, or dealing with deeply nested or inconsistent object structures.
+          </p>
+
+          <h2 id="limitations">Limitations</h2>
+          <p>
+            TOON isn't perfect. It struggles with deeply nested data, objects with varying schemas, and tooling is still emerging. Most workflows will involve converting from JSON to TOON before sending to the LLM. But for the right use case—large, structured, repetitive data—it's a game-changer.
+          </p>
+        </div>
+
+        <!-- Recommendations -->
+        <section class="recommendations-section">
+          <div class="recommendations-header">
+            <h2>// EXPLORE_MORE</h2>
+          </div>
+          <div class="recommendations-grid">
+            <a href="https://trytoon.dev/" class="rec-card">
+              <span class="rec-meta">Tool</span>
+              <h3>Try TOON Interactive Converter</h3>
+              <p class="rec-excerpt">
+                Experiment with TOON using a browser-based JSON-to-TOON converter. No data leaves your browser.
+              </p>
+            </a>
+            <a href="#" class="rec-card">
+              <span class="rec-meta">Concept</span>
+              <h3>LLM Token Economics</h3>
+              <p class="rec-excerpt">
+                Understanding how token pricing works and why data format efficiency matters for AI applications.
+              </p>
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="simple-footer">
+    <div class="footer-content">
+      <a href="index.html" class="footer-home-mark" title="Return Home">T</a>
+      <div class="footer-info">
+        <span>Bit by Bit Series • 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme Toggle
+    const themeBtn = document.getElementById('themeToggle');
+    const iconSun = document.getElementById('iconSun');
+    const iconMoon = document.getElementById('iconMoon');
+
+    // Default is light mode, dark is opt-in
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      iconSun.style.display = 'block';
+      iconMoon.style.display = 'none';
+    } else {
+      // Light mode (default)
+      iconSun.style.display = 'none';
+      iconMoon.style.display = 'block';
+    }
+
+    themeBtn.onclick = () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      if (current === 'dark') {
+        // Switch to light
+        document.documentElement.removeAttribute('data-theme');
+        iconSun.style.display = 'none';
+        iconMoon.style.display = 'block';
+        localStorage.setItem('theme', 'light');
+      } else {
+        // Switch to dark
+        document.documentElement.setAttribute('data-theme', 'dark');
+        iconSun.style.display = 'block';
+        iconMoon.style.display = 'none';
+        localStorage.setItem('theme', 'dark');
+      }
+    };
+
+    // Scroll Indicator
+    const scrollIndicator = document.getElementById('scrollIndicator');
+    window.addEventListener('scroll', () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
+      scrollIndicator.style.width = scrollPercent + '%';
+    });
+
+    // Sticky Sidebar & Small Title Animation (Intersection Observer on Hero)
+    const heroSection = document.getElementById('heroSection');
+    const metaSidebar = document.getElementById('metaSidebar');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        // When hero section leaves view (is not intersecting), add scrolled class
+        if (!entry.isIntersecting) {
+          metaSidebar.classList.add('scrolled');
+        } else {
+          metaSidebar.classList.remove('scrolled');
+        }
+      });
+    }, {
+      rootMargin: "-100px 0px 0px 0px", 
+      threshold: 0
+    });
+
+    if(heroSection) {
+        observer.observe(heroSection);
+    }
+
+    // Active TOC
+    const sections = document.querySelectorAll('.article-content h2[id]');
+    const tocLinks = document.querySelectorAll('.toc-link');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (window.scrollY >= (sectionTop - 200)) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      tocLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

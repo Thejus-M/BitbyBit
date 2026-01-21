@@ -258,6 +258,12 @@ Create a technical blog post for the "Bit by Bit" series about [TOPIC].
   - **<1024px (Tablet):** Single column. Hero image sits BELOW text (`order: 0`). Sidebar (`.meta-sidebar`) is HIDDEN (`display: none`). Remove side padding on main column.
   - **<768px (Mobile):** Hero metadata grid uses 2 columns (`repeat(2, 1fr)`). Tighter spacing.
   - **<480px (Small Mobile):** Edge-to-edge code blocks/callouts (negative margins). Scaled down typography.
+- **Mobile TOC Feature:**
+  - **Style:** "Bottom Sheet" (50% max-height default, expandable to ~92%).
+  - **Interaction:** Drag handle to expand/collapse. Pull down to close. Backdrop click to close.
+  - **Behavior:** Auto-scroll to active section on open. Clones desktop TOC.
+  - **Design:** drag handle (pill), 2-line header (Tag + Title), solid background (no blur).
+  - **FAB Button:** 50x50px squircle with **8px border-radius**, centered hamburger icon, thin accent border. Hides on scroll (any direction), shows on stop (300ms delay).
 
 **Tone:** Professional, direct, technically accurate, honest about trade-offs
 

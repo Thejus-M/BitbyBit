@@ -516,6 +516,11 @@
       margin-bottom: 24px;
       padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: 120px;
+    }
+    
+    #intro {
       scroll-margin-top: 120px;
     }
 
@@ -871,6 +876,218 @@
       background: var(--accent); width: 0%; z-index: 600;
       transition: width 0.1s ease-out; box-shadow: 0 0 10px var(--accent-glow);
     }
+    
+    /* MOBILE TOC FAB & OVERLAY */
+    .mobile-toc-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 50px;
+      height: 50px;
+      background: var(--bg-card); 
+      border: 1px solid var(--accent);
+      border-radius: 8px; /* Squircle shape */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 990;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      
+      /* Faster transition for responsiveness (0.5s) */
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      display: none; 
+    }
+
+    .mobile-toc-fab.hidden {
+      /* Just fade out in place, maybe slight shrink, no big movement */
+      transform: scale(0.85);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mobile-toc-fab svg {
+      width: 24px; 
+      height: 24px; 
+      stroke: var(--accent);
+    }
+
+    .mobile-toc-fab:active {
+      transform: scale(0.95);
+    }
+
+    .mobile-toc-overlay {
+      position: fixed;
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%;
+      z-index: 1000;
+      visibility: hidden;
+      pointer-events: none;
+      transition: visibility 0.3s;
+    }
+
+    .mobile-toc-overlay.active {
+      visibility: visible;
+      pointer-events: auto;
+    }
+    
+    .mobile-toc-backdrop {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .mobile-toc-overlay.active .mobile-toc-backdrop {
+      opacity: 1;
+    }
+
+    .mobile-toc-sheet {
+      position: absolute;
+      bottom: 0; 
+      left: 0; 
+      width: 100%;
+      height: 50vh; /* Default half-height */
+      max-height: 92vh;
+      background: var(--bg-body);
+      border-radius: 24px 24px 0 0;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .mobile-toc-overlay.active .mobile-toc-sheet {
+      transform: translateY(0);
+    }
+    
+    .mobile-toc-sheet.expanded {
+      height: 92vh;
+    }
+    
+    .mobile-toc-handle-bar {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding-top: 12px;
+      padding-bottom: 8px;
+      flex-shrink: 0;
+      touch-action: none; /* Crucial for dragging */
+      cursor: grab;
+    }
+
+    .mobile-toc-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      opacity: 0.5;
+    }
+
+    .mobile-toc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px 24px 24px;
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    
+    .mobile-toc-header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mobile-toc-tag {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.7;
+    }
+    
+    .mobile-toc-title-main {
+      font-family: var(--font-main);
+      font-size: 1.1rem;
+      color: var(--text-main);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .mobile-toc-close {
+      background: var(--bg-card-elevated);
+      border: 1px solid var(--border);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      border-radius: 8px; 
+      color: var(--text-sub);
+    }
+
+    .mobile-toc-close svg {
+      width: 18px; 
+      height: 18px; 
+      stroke: currentColor;
+    }
+    
+    .mobile-toc-content {
+      padding: 16px 24px 40px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    
+    /* List Styling matching image */
+    .mobile-toc-content .toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0; /* Let padding handle spacing */
+    }
+
+    .mobile-toc-content .toc-link {
+      font-family: var(--font-main);
+      font-size: 15px; 
+      color: var(--text-sub);
+      text-decoration: none;
+      display: flex; 
+      align-items: baseline;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid transparent; 
+      transition: all 0.2s;
+    }
+
+    .mobile-toc-content .toc-link::before {
+      content: "+";
+      color: var(--accent);
+      font-family: var(--font-mono-sys);
+      font-size: 14px;
+      opacity: 0.7;
+    }
+    
+    .mobile-toc-content .toc-link.active {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    
+    .mobile-toc-content .toc-link.active::before {
+      content: "→";
+      opacity: 1;
+    }
+
+    @media (max-width: 1024px) {
+      .mobile-toc-fab { display: flex; }
+    }
   </style>
 </head>
 
@@ -1104,6 +1321,47 @@
     </div>
   </footer>
 
+  <!-- MOBILE TOC ELEMENTS -->
+  <button id="mobileTocBtn" class="mobile-toc-fab" aria-label="Open Table of Contents" onclick="document.getElementById('mobileTocOverlay').classList.add('active')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <div id="mobileTocOverlay" class="mobile-toc-overlay">
+    <!-- Backdrop closes sheet -->
+    <div class="mobile-toc-backdrop" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')"></div>
+    
+    <!-- Sheet Container -->
+    <div class="mobile-toc-sheet" id="mobileTocSheet">
+      <!-- Drag Handle -->
+      <div class="mobile-toc-handle-bar">
+        <div class="mobile-toc-handle"></div>
+      </div>
+      
+      <!-- 2-Line Header -->
+      <div class="mobile-toc-header">
+        <div class="mobile-toc-header-text">
+          <span class="mobile-toc-tag">// BIT_BY_BIT_LOG</span>
+          <span class="mobile-toc-title-main">Understanding TOONs</span>
+        </div>
+        
+        <button id="mobileTocClose" class="mobile-toc-close" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="mobile-toc-content" id="mobileTocContent">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
   <script>
     // Theme Toggle
     const themeBtn = document.getElementById('themeToggle');
@@ -1172,9 +1430,10 @@
     }
 
     // Active TOC
-    const sections = document.querySelectorAll('.article-content h2[id]');
-    const tocLinks = document.querySelectorAll('.toc-link');
-
+    const sections = document.querySelectorAll('.article-content h2[id], #intro');
+    
+    // We select links dynamically inside the scroll loop or using a more broad selector
+    // to ensure we catch both desktop and cloned mobile links.
     window.addEventListener('scroll', () => {
       let current = '';
       sections.forEach(section => {
@@ -1184,13 +1443,175 @@
         }
       });
 
-      tocLinks.forEach(link => {
+      // Update ALL toc links (desktop + mobile)
+      document.querySelectorAll('.toc-link').forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('href') === '#' + current) {
           link.classList.add('active');
         }
       });
     });
+
+    // FAB Auto-Hide on Scroll + Show on Stop
+    let lastScrollY = window.scrollY;
+    let scrollTimeout;
+    
+    window.addEventListener('scroll', () => {
+       const fabToCheck = document.getElementById('mobileTocBtn');
+       if (!fabToCheck) return;
+       
+       const currentScrollY = window.scrollY;
+       const scrollDelta = currentScrollY - lastScrollY;
+       
+       // 1. Hide if scrolling (delta > 5 in ANY direction)
+       // The user requested it to hide even when scrolling at the top.
+       if (Math.abs(scrollDelta) > 5) {
+           fabToCheck.classList.add('hidden');
+       }
+       
+       lastScrollY = currentScrollY;
+       
+       // 3. Safety: Mirror the "come slowly" effect when stopped
+       clearTimeout(scrollTimeout);
+       scrollTimeout = setTimeout(() => {
+           fabToCheck.classList.remove('hidden');
+       }, 300); // 0.3s pause -> fade in
+       
+    }, { passive: true });
+
+    // MOBILE TOC LOGIC
+    document.addEventListener('DOMContentLoaded', () => {
+        const mobileTocOverlay = document.getElementById('mobileTocOverlay');
+        const mobileTocSheet = document.getElementById('mobileTocSheet');
+        const mobileTocContent = document.getElementById('mobileTocContent');
+        const desktopTocList = document.getElementById('tocList');
+        const handleBar = document.querySelector('.mobile-toc-handle-bar');
+    
+        // Clone TOC content
+        if (desktopTocList && mobileTocContent) {
+          mobileTocContent.innerHTML = '';
+          const clonedList = desktopTocList.cloneNode(true);
+          clonedList.removeAttribute('id'); 
+          mobileTocContent.appendChild(clonedList);
+          
+          // Links close overlay
+          mobileTocContent.querySelectorAll('.toc-link').forEach(link => {
+            link.addEventListener('click', () => mobileTocOverlay.classList.remove('active'));
+          });
+        }
+        
+        // Handle Bar tap to expand (fallback if no drag)
+        if (handleBar && mobileTocSheet) {
+          handleBar.addEventListener('click', (e) => {
+             // Only toggle if it wasn't a drag (simple click)
+             // We can check this via a flag if needed, but for now simple toggle is ok
+             // mobileTocSheet.classList.toggle('expanded'); 
+          });
+        }
+        
+        // --- GESTURE LOGIC ---
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        let startHeight = 0;
+        let isExpanded = false;
+        
+        const touchArea = document.querySelector('.mobile-toc-header'); // Header + Handle is drag zone
+        
+        if (touchArea) {
+            touchArea.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+                isExpanded = mobileTocSheet.classList.contains('expanded');
+                startHeight = mobileTocSheet.offsetHeight;
+                
+                // Disable transition for instant follow
+                mobileTocSheet.style.transition = 'none';
+            }, { passive: false });
+            
+            touchArea.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+                
+                // Logic:
+                // If dragging UP (deltaY < 0): Increase Height
+                // If dragging DOWN (deltaY > 0): Translate Y (Close effect)
+                
+                if (deltaY < 0) {
+                    // Dragging UP - Expanding
+                     // Prevent scrolling body
+                    e.preventDefault();
+                    
+                    if (!isExpanded) {
+                         const newHeight = startHeight + Math.abs(deltaY);
+                         mobileTocSheet.style.height = `${newHeight}px`;
+                         mobileTocSheet.style.transform = `translateY(0)`;
+                    }
+                } else {
+                    // Dragging DOWN - Closing
+                    e.preventDefault();
+                     // If we are expanded, dragging down should just shrink height back to 50vh first?
+                     // Simplification: If expanded, drag down shrinks height. If half, drag down translates.
+                     
+                     if (isExpanded) {
+                         const newHeight = Math.max(window.innerHeight * 0.5, startHeight - deltaY);
+                         mobileTocSheet.style.height = `${newHeight}px`;
+                     } else {
+                         // Dragging sheet away
+                         mobileTocSheet.style.transform = `translateY(${deltaY}px)`;
+                     }
+                }
+            }, { passive: false });
+            
+            touchArea.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                mobileTocSheet.style.transition = ''; // Restore CSS transition
+                
+                const deltaY = currentY - startY;
+                
+                // Thresholds
+                if (deltaY < -50) {
+                    // Dragged Up significantly -> Expand
+                    mobileTocSheet.style.height = ''; // Clear inline style
+                    mobileTocSheet.classList.add('expanded');
+                    mobileTocSheet.style.transform = '';
+                } else if (deltaY > 50) {
+                    // Dragged Down significantly
+                    if (isExpanded) {
+                        // Collapse to half
+                        mobileTocSheet.style.height = ''; 
+                        mobileTocSheet.classList.remove('expanded');
+                    } else {
+                        // Close Overlay
+                        mobileTocOverlay.classList.remove('active');
+                        mobileTocSheet.style.transform = '';
+                    }
+                } else {
+                    // Snap back to state
+                   mobileTocSheet.style.height = '';
+                   mobileTocSheet.style.transform = '';
+                }
+            });
+        }
+        
+        // Auto-Scroll to active link when opening
+        const openBtn = document.getElementById('mobileTocBtn');
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                 setTimeout(() => {
+                     const activeLink = mobileTocContent.querySelector('.toc-link.active');
+                     if (activeLink) {
+                         activeLink.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                     }
+                 }, 100);
+            });
+        }
+    });
+
+    /* Inline onclick handlers added to HTML for robustness */
+
   </script>
 </body>
 </html>

@@ -246,7 +246,14 @@ Create a technical blog post for the "Bit by Bit" series about [TOPIC].
 
 **Design Requirements:**
 - **Strictly Sharp Corners:** All UI elements (tags, code blocks, images, buttons) must have `border-radius: 0`. No rounded corners.
-- **Color Scheme:** Use the blue color scheme (#2A5D9C light, #5682B1 dark).
+- **Color Scheme:**
+  - **Light Mode:** "Old Paper" aesthetic (`#E2DFD6` bg, `#262626` text, `#CFCBC2` border).
+  - **Dark Mode:** "Terminal" aesthetic (`#000000` bg, `#6BA4D9` blue text accent).
+- **Recommendation Cards:**
+  - **Style:** "Tactile Paper" feel using `box-shadow: 4px 4px 0 var(--border-sub)`.
+  - **Hover:** Lift (-2px) and sharpen shadow to `var(--accent)`. Hard "bump" effect.
+  - **Structure:** Badge (Top Left), Serif Typography (Title/Excerpt), Footer with Metadata + "Read" Button.
+  - **Button:** Neutral border/text by default. Turns solid blue on *button hover only*.
 - **Sidebar Markers:** TOC links must use `+` for default state and `→` for active state (font size 14px).
 - **Layout:** Content max-width 1400px centered.
 - **Code Blocks:** Sharp corners, no negative margins (except on mobile), proper labels.

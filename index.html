@@ -772,6 +772,7 @@
     }
   </style>
   <script src="theme-init.js"></script>
+  <script src="blog-data.js"></script>
 </head>
 
 <body>
@@ -868,55 +869,8 @@
 
     <!-- CONTENT LAYOUT -->
     <div class="content-layout">
-      <div class="articles-grid">
-        
-        <!-- CARD 1: TOONS -->
-        <a href="toons-blog.html" class="rec-card">
-          <span class="rec-badge">// NEWEST</span>
-          <h3>Understanding TOONs</h3>
-          <p class="rec-excerpt">
-            Why JSON is costing you money in LLM tokens, and how Token-Oriented Object Notation allows you to send 50% more data for the same price.
-          </p>
-          
-          <div class="rec-footer">
-            <div class="rec-meta">
-              <span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                2026.01.17
-              </span>
-              <span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                12 Min Read
-              </span>
-            </div>
-            <div class="rec-btn">
-              Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </div>
-          </div>
-        </a>
-
-        <!-- CARD 2: Placeholder for Future -->
-        <a href="#" class="rec-card" style="opacity: 0.6; pointer-events: none;">
-          <span class="rec-badge">COMING SOON</span>
-          <h3>The Anatomy of WebAssembly</h3>
-          <p class="rec-excerpt">
-            A deep dive into how WASM works under the hood and why it's changing the landscape of high-performance web applications.
-          </p>
-          
-          <div class="rec-footer">
-            <div class="rec-meta">
-              <span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                TBA
-              </span>
-            </div>
-            <div class="rec-btn">
-              Stay Tuned
-            </div>
-          </div>
-        </a>
-
-      </div>
+      <!-- Grid container to be populated by JS -->
+      <div class="articles-grid"></div>
     </div>
   </div>
 
@@ -955,6 +909,61 @@
       window.ThemeManager.toggle();
       updateThemeIcons();
     };
+
+    // --- DYNAMIC BLOG RENDERING ---
+    (function renderBlogs() {
+      const grid = document.querySelector('.articles-grid');
+      if (!grid || typeof BLOG_DATA === 'undefined') return;
+
+      grid.innerHTML = ''; // Clear loading state
+
+      BLOG_DATA.forEach(post => {
+        const card = document.createElement('a');
+        card.href = post.link;
+        card.className = 'rec-card';
+        
+        if (post.isComingSoon) {
+          card.style.opacity = '0.6';
+          card.style.pointerEvents = 'none';
+        }
+
+        // Badge
+        let badgeHTML = '';
+        if (post.tags && post.tags.length > 0) {
+          badgeHTML = post.tags.map(tag => `<span class="rec-badge">// ${tag}</span>`).join('');
+        }
+
+        // Svg Icons
+        const dateIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+        const timeIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+        const arrowIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+
+        // Button and Meta content logic
+        const btnText = post.isComingSoon ? 'Stay Tuned' : `Read Article ${arrowIcon}`;
+        
+        let metaContent = `<span>${dateIcon} ${post.date}</span>`;
+        if (!post.isComingSoon) {
+          metaContent += `<span>${timeIcon} ${post.readTime}</span>`;
+        }
+
+        card.innerHTML = `
+          ${badgeHTML}
+          <h3>${post.title}</h3>
+          <p class="rec-excerpt">${post.excerpt}</p>
+          
+          <div class="rec-footer">
+            <div class="rec-meta">
+              ${metaContent}
+            </div>
+            <div class="rec-btn">
+              ${btnText}
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    })();
   </script>
 </body>
 </html>

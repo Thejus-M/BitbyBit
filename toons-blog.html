@@ -1148,6 +1148,7 @@
       .mobile-toc-fab { display: flex; }
     }
   </style>
+  <script src="theme-init.js"></script>
 </head>
 
 <body>
@@ -1459,33 +1460,24 @@
     const iconSun = document.getElementById('iconSun');
     const iconMoon = document.getElementById('iconMoon');
 
-    // Default is light mode, dark is opt-in
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      iconSun.style.display = 'block';
-      iconMoon.style.display = 'none';
-    } else {
-      // Light mode (default)
-      iconSun.style.display = 'none';
-      iconMoon.style.display = 'block';
+    // Function to update icons based on current theme
+    function updateThemeIcons() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+          iconSun.style.display = 'block';
+          iconMoon.style.display = 'none';
+      } else {
+          iconSun.style.display = 'none';
+          iconMoon.style.display = 'block';
+      }
     }
 
+    // Initialize icons
+    updateThemeIcons();
+
     themeBtn.onclick = () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      if (current === 'dark') {
-        // Switch to light
-        document.documentElement.removeAttribute('data-theme');
-        iconSun.style.display = 'none';
-        iconMoon.style.display = 'block';
-        localStorage.setItem('theme', 'light');
-      } else {
-        // Switch to dark
-        document.documentElement.setAttribute('data-theme', 'dark');
-        iconSun.style.display = 'block';
-        iconMoon.style.display = 'none';
-        localStorage.setItem('theme', 'dark');
-      }
+      window.ThemeManager.toggle();
+      updateThemeIcons();
     };
 
     // Scroll Indicator

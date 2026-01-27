@@ -14,23 +14,23 @@
     :root {
       /* --- DESIGN SYSTEM FROM BB.HTML --- */
       
-      /* Light Theme (Default) */
+      /* Light Theme (Paper-Like) */
       --accent: #2A5D9C;
       --accent-hover: #1e4575;
       --accent-soft: rgba(42, 93, 156, 0.12);
       --accent-bright: #2A5D9C;
       --accent-glow: rgba(42, 93, 156, 0.3);
 
-      --bg-body: #ffffff;
-      --bg-card: #ffffff;
-      --bg-card-elevated: #ffffff;
-      --text-main: #111111;
-      --text-sub: #666666;
-      --text-code: #111111;
+      --bg-body: #E2DFD6; /* Warm "Old Paper" */
+      --bg-card: #EBE8DF; /* Lighter than body */
+      --bg-card-elevated: #EBE8DF;
+      --text-main: #262626; /* Charcoal */
+      --text-sub: #545454;
+      --text-code: #262626;
       
-      --border: #E5E5E5;
-      --border-sub: #e0e0e0;
-      --grid-line: #e0ecf8;
+      --border: #CFCBC2;
+      --border-sub: #D9D6CD;
+      --grid-line: #D9D6CD;
 
       /* --- FONTS --- */
       --font-serif: 'EB Garamond', Georgia, serif;
@@ -49,12 +49,12 @@
       --accent-bright: #739EC9;
       --accent-glow: rgba(86, 130, 177, 0.3);
 
-      --bg-body: #000000; 
-      --bg-card: #000000; 
+      --bg-body: #000000; /* Pure Black */
+      --bg-card: #0f0f0f;
       --bg-card-elevated: #0f0f0f;
       
       /* Matching Blue Text from Image */
-      --text-main: #6BA4D9; /* Brighter, clearer blue */
+      --text-main: #6BA4D9; /* Terminal Blue */
       --text-sub: #4A7091;
       --text-code: #6BA4D9;
       
@@ -611,7 +611,7 @@
       margin: 40px 0;
     }
 
-    [data-theme="light"] .callout { background: #FAFAF8; }
+    [data-theme="light"] .callout { background: var(--bg-card); }
 
     .callout-title {
       font-family: var(--font-mono-sys);
@@ -764,7 +764,7 @@
     .rec-btn:hover {
       border-color: var(--accent);
       background: var(--accent);
-      color: #fff; /* White text on blue bg */
+      color: var(--bg-card); /* Off-white text on blue bg */
       cursor: pointer;
     }
 

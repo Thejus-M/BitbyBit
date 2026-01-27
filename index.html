@@ -14,23 +14,23 @@
     :root {
       /* --- DESIGN SYSTEM FROM BB.HTML --- */
       
-      /* Light Theme (Default) */
+      /* Light Theme (Paper-Like) */
       --accent: #2A5D9C;
       --accent-hover: #1e4575;
       --accent-soft: rgba(42, 93, 156, 0.12);
       --accent-bright: #2A5D9C;
       --accent-glow: rgba(42, 93, 156, 0.3);
 
-      --bg-body: #ffffff;
-      --bg-card: #ffffff;
-      --bg-card-elevated: #ffffff;
-      --text-main: #111111;
-      --text-sub: #666666;
-      --text-code: #111111;
+      --bg-body: #E2DFD6; /* Warm "Old Paper" */
+      --bg-card: #EBE8DF; /* Lighter than body */
+      --bg-card-elevated: #EBE8DF;
+      --text-main: #262626; /* Charcoal */
+      --text-sub: #545454;
+      --text-code: #262626;
       
-      --border: #E5E5E5;
-      --border-sub: #e0e0e0;
-      --grid-line: #e0ecf8;
+      --border: #CFCBC2;
+      --border-sub: #D9D6CD;
+      --grid-line: #D9D6CD;
 
       /* --- FONTS --- */
       --font-serif: 'EB Garamond', Georgia, serif;
@@ -49,12 +49,12 @@
       --accent-bright: #739EC9;
       --accent-glow: rgba(86, 130, 177, 0.3);
 
-      --bg-body: #000000; 
-      --bg-card: #000000; 
+      --bg-body: #000000; /* Pure Black */
+      --bg-card: #0f0f0f;
       --bg-card-elevated: #0f0f0f;
       
       /* Matching Blue Text from Image */
-      --text-main: #6BA4D9; /* Brighter, clearer blue */
+      --text-main: #6BA4D9; /* Terminal Blue */
       --text-sub: #4A7091;
       --text-code: #6BA4D9;
       
@@ -373,7 +373,7 @@
     .rec-btn:hover {
       border-color: var(--accent);
       background: var(--accent);
-      color: #fff; /* White text on blue bg */
+      color: var(--bg-card); /* Off-white text on blue bg */
       cursor: pointer;
     }
 
@@ -521,7 +521,7 @@
       position: absolute;
       background: var(--text-main);
       border: 2px solid rgba(0,0,0,0.2);
-      box-shadow: inset 2px 2px 0 rgba(255,255,255,0.1);
+      box-shadow: inset 2px 2px 0 rgba(235, 232, 223, 0.1);
     }
 
     /* 1. Title Block (Long Bar) - Falls first */
@@ -536,7 +536,7 @@
     }
     .piece-title::after {
       content: "TITLE_BLOCK.BIT";
-      color: white; font-family: var(--font-pixel); font-size: 8px;
+      color: var(--bg-card); font-family: var(--font-pixel); font-size: 8px;
       /* centering is handled by translate */
     }
 
@@ -612,8 +612,8 @@
       padding: 120px 20px 100px;
       /* Subtle grid bg from image */
       background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(235, 232, 223, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(235, 232, 223, 0.03) 1px, transparent 1px);
       background-size: 30px 30px;
     }
     
@@ -660,6 +660,7 @@
       position: absolute;
       /* The "Falling" Animation setup */
       animation: fall-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+      box-shadow: inset 2px 2px 0 rgba(235, 232, 223, 0.1);
     }
     
     [data-theme="dark"] .c-block {

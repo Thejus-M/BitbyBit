@@ -1,1 +1,959 @@
-<button onclick="window.location.href='toons-blog.html'">Go to Toons Blog</button>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bit by Bit — Tech Explained Visually</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Share+Tech+Mono&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      /* --- DESIGN SYSTEM FROM BB.HTML --- */
+      
+      /* Light Theme (Default) */
+      --accent: #2A5D9C;
+      --accent-hover: #1e4575;
+      --accent-soft: rgba(42, 93, 156, 0.12);
+      --accent-bright: #2A5D9C;
+      --accent-glow: rgba(42, 93, 156, 0.3);
+
+      --bg-body: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-elevated: #ffffff;
+      --text-main: #111111;
+      --text-sub: #666666;
+      --text-code: #111111;
+      
+      --border: #E5E5E5;
+      --border-sub: #e0e0e0;
+      --grid-line: #e0ecf8;
+
+      /* --- FONTS --- */
+      --font-serif: 'EB Garamond', Georgia, serif;
+      --font-main: 'Inter', sans-serif;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono-sys: 'Share Tech Mono', monospace;
+      --font-mono-code: 'JetBrains Mono', monospace;
+      --font-pixel: 'Press Start 2P', cursive;
+    }
+
+
+    [data-theme="dark"] {
+      --accent: #5682B1;
+      --accent-hover: #739EC9;
+      --accent-soft: rgba(86, 130, 177, 0.2);
+      --accent-bright: #739EC9;
+      --accent-glow: rgba(86, 130, 177, 0.3);
+
+      --bg-body: #000000; 
+      --bg-card: #000000; 
+      --bg-card-elevated: #0f0f0f;
+      
+      /* Matching Blue Text from Image */
+      --text-main: #6BA4D9; /* Brighter, clearer blue */
+      --text-sub: #4A7091;
+      --text-code: #6BA4D9;
+      
+      --border: #4A7091;
+      --border-sub: #333333;
+      --grid-line: #111111;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      line-height: 1.6;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* HEADER */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      background: var(--bg-card);
+      z-index: 500;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 20px rgba(0, 212, 255, 0.05);
+    }
+
+    .header-brand {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .brand-logo-text {
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      position: relative;
+      transition: all 0.3s ease;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-logo-text:hover {
+      transform: scale(1.05);
+    }
+
+    [data-theme="dark"] .brand-logo-text {
+      color: var(--accent-bright);
+    }
+
+    .brand-connector {
+      color: var(--text-sub);
+      font-size: 10px;
+      font-family: var(--font-mono-sys);
+      text-transform: lowercase;
+      font-weight: 300;
+      letter-spacing: 0;
+    }
+
+    .header-status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-tagline {
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    #themeToggle {
+      background: none;
+      border: 1px solid var(--border);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #themeToggle:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    #themeToggle svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--text-sub);
+    }
+
+    /* PAGE LAYOUT */
+    .page-wrapper {
+      padding-top: 60px;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HOME HERO SECTION */
+    .hero-section {
+      padding: 100px 40px 80px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(77, 159, 255, 0.03) 0%, transparent 100%);
+    }
+
+    .hero-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-meta-top {
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 24px;
+      display: inline-block;
+      border: 1px solid var(--accent-soft);
+      padding: 6px 12px;
+      background: var(--bg-card-elevated);
+      border-radius: 0;
+    }
+
+    .hero-title {
+      font-family: var(--font-pixel);
+      font-size: 4rem;
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--text-main);
+      margin-bottom: 32px;
+      letter-spacing: -1px;
+      text-transform: uppercase;
+      
+      /* Logo Style Layout */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .hero-brand-connector {
+      color: var(--text-sub);
+      font-size: 1.5rem;
+      font-family: var(--font-mono-sys);
+      text-transform: lowercase;
+      font-weight: 300;
+      letter-spacing: 0;
+      margin-top: 6px;
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      color: var(--text-sub);
+      line-height: 1.6;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* CONTENT LAYOUT Grid */
+    .content-layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+
+    /* CARD GRID */
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .rec-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 40px; 
+      transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      text-decoration: none;
+      display: flex; 
+      flex-direction: column;
+      height: 100%;
+      /* Resting state: Subtle hard shadow */
+      box-shadow: 4px 4px 0 var(--border-sub);
+    }
+
+    .rec-card:hover {
+      border-color: var(--accent);
+      /* Hover state: Lift up and sharpen shadow to accent */
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--accent);
+    }
+
+    /* Badge Style */
+    .rec-badge {
+      align-self: flex-start;
+      background: var(--border-sub); /* Neutral background */
+      color: var(--text-main);
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 8px 12px;
+      margin-bottom: 24px;
+      border-radius: 4px; 
+    }
+
+    /* Serif Title */
+    .rec-card h3 {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    /* Serif Excerpt */
+    .rec-excerpt {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      color: var(--text-sub);
+      line-height: 1.6;
+      margin-bottom: 32px;
+      flex-grow: 1; /* Pushes footer elements down */
+    }
+
+    .rec-footer {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .rec-meta {
+      display: flex;
+      gap: 24px;
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .rec-meta span {
+      display: flex; align-items: center; gap: 8px;
+    }
+    
+    .rec-meta svg { width: 14px; height: 14px; stroke: currentColor; }
+
+    /* "Read" Button */
+    .rec-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: 1px solid var(--border);
+      color: var(--text-main); /* Neutral text initially */
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      width: fit-content;
+      transition: all 0.2s;
+    }
+    
+    /* Hover for Button */
+    .rec-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff; /* White text on blue bg */
+      cursor: pointer;
+    }
+
+    /* FOOTER */
+    .simple-footer {
+      border-top: 1px solid var(--border);
+      padding: 80px 40px;
+      margin-top: 100px;
+      background: var(--bg-card);
+      position: relative;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .footer-home-mark {
+      font-family: var(--font-pixel);
+      font-size: 16px;
+      color: var(--accent);
+      text-decoration: none;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .footer-home-mark:hover {
+      transform: scale(1.1) translateY(-3px);
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+    }
+
+    .footer-home-mark::after {
+      content: ".";
+      color: var(--accent);
+    }
+    
+    .footer-info {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .header { padding: 0 20px; }
+      .hero-section { padding: 80px 20px 60px; }
+      .hero-title { font-size: 3rem; }
+      .content-layout { padding: 40px 20px; }
+      .articles-grid { grid-template-columns: 1fr; }
+    }
+    
+    /* HOME SPLIT HERO STYLES */
+    .home-hero-container {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 60px;
+      max-width: 1400px;
+      margin: 0 auto;
+      align-items: center;
+      min-height: 500px;
+    }
+    
+    .home-hero-text {
+      text-align: left;
+      z-index: 2;
+    }
+    
+    .home-hero-text .hero-title {
+      justify-content: flex-start; /* Align logo left */
+      margin-left: -4px; /* Optical alignment */
+      font-size: 5.5rem; /* Larger impact */
+    }
+    
+    .home-hero-text .hero-subtitle {
+      margin: 0;
+      max-width: 90%;
+      font-size: 1.25rem;
+    }
+    
+    .home-hero-text .hero-meta-top {
+      margin-bottom: 32px;
+    }
+
+    /* VISUAL ART: "Tetris Page Builder" */
+    .home-hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 400px;
+    }
+
+    .tetris-stage {
+      width: 300px;
+      height: 400px;
+      position: relative;
+      background: var(--bg-card);
+      border: 4px solid var(--text-main);
+      box-shadow: 12px 12px 0 var(--accent-soft);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Game Header */
+    .game-ui {
+      height: 40px;
+      background: var(--bg-card-elevated);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      color: var(--text-sub);
+    }
+    
+    .score-box {
+      color: var(--accent);
+    }
+
+    /* Game Board */
+    .game-board {
+      flex-grow: 1;
+      position: relative;
+      overflow: hidden;
+      background-image:
+        linear-gradient(var(--border-sub) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-sub) 1px, transparent 1px);
+      background-size: 20px 20px;
+      opacity: 0.8;
+    }
+
+    /* The Pieces */
+    .t-piece {
+      position: absolute;
+      background: var(--text-main);
+      border: 2px solid rgba(0,0,0,0.2);
+      box-shadow: inset 2px 2px 0 rgba(255,255,255,0.1);
+    }
+
+    /* 1. Title Block (Long Bar) - Falls first */
+    .piece-title {
+      width: 200px;
+      height: 40px;
+      background: var(--accent);
+      left: 50px;
+      top: 40px; /* Final Pos */
+      animation: drop-1 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+      animation-delay: 0.2s;
+    }
+    .piece-title::after {
+      content: "TITLE_BLOCK.BIT";
+      color: white; font-family: var(--font-pixel); font-size: 8px;
+      /* centering is handled by translate */
+    }
+
+    /* 2. Image Block (Square) - Falls second */
+    .piece-image {
+      width: 120px;
+      height: 100px;
+      background: #E5C07B; /* Yellowish */
+      left: 50px;
+      top: 100px; /* Final Pos */
+      animation: drop-2 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+      animation-delay: 1.0s;
+    }
+    
+    /* 3. Sidebar Block (L-Shape approximation) - Falls third */
+    .piece-sidebar {
+      width: 60px;
+      height: 140px;
+      background: #98C379; /* Greenish */
+      left: 190px;
+      top: 100px;
+      animation: drop-3 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+      animation-delay: 1.8s;
+    }
+
+    /* 4. Text Content - Falls last */
+    .piece-text {
+      width: 120px;
+      height: 80px;
+      background: #61AFEF; /* Blueish */
+      left: 50px;
+      top: 220px;
+      animation: drop-4 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+      animation-delay: 2.6s;
+    }
+    
+    /* Drop Keyframes (Start from -200px) */
+    @keyframes drop-1 { 0% { opacity: 0; transform: translateY(-300px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes drop-2 { 0% { opacity: 0; transform: translateY(-300px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes drop-3 { 0% { opacity: 0; transform: translateY(-300px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes drop-4 { 0% { opacity: 0; transform: translateY(-300px); } 100% { opacity: 1; transform: translateY(0); } }
+
+    /* "Game Over" / "Complete" Overlay */
+    .game-complete {
+      position: absolute;
+      bottom: 20px; left: 0; right: 0;
+      text-align: center;
+      font-family: var(--font-pixel);
+      color: var(--text-main);
+      font-size: 10px;
+      animation: blink-soft 2s infinite;
+      animation-delay: 3.5s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+    @keyframes blink-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    @media (max-width: 1024px) {
+      .home-hero-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 60px;
+        padding-bottom: 40px;
+      }
+      .home-hero-text .hero-title { justify-content: center; margin-left: 0; }
+      .home-hero-text .hero-subtitle { margin: 0 auto; }
+      
+      .tetris-stage { transform: scale(0.9); }
+    }
+
+    /* HERO: Falling Block Construction */
+    .hero-section {
+      padding: 120px 20px 100px;
+      /* Subtle grid bg from image */
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+    
+    .hero-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* THE CONSTRUCTED LOGO */
+    .logo-construction {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      margin: 40px 0 60px;
+      position: relative;
+    }
+
+    /* Connective "by" */
+    .logo-word-by {
+      font-family: var(--font-mono-sys);
+      font-size: 1.5rem;
+      color: var(--text-sub);
+      margin-top: 20px;
+      opacity: 0;
+      animation: fade-in 1s ease forwards;
+      animation-delay: 2.2s;
+    }
+
+    /* Letter Container */
+    .c-letter {
+      width: 60px;
+      height: 90px;
+      position: relative;
+    }
+
+    /* SHARED BLOCK STYLES */
+    .c-block {
+      background: var(--accent);
+      position: absolute;
+      /* The "Falling" Animation setup */
+      animation: fall-in 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+    }
+    
+    [data-theme="dark"] .c-block {
+       background: #6BA4D9; /* Specifically matching the blue from image */
+    }
+
+    /* --- SHAPE DEFINITIONS (14px Grid for thinner look) --- */
+    
+    /* B SHAPE - Pixel style with rounded corners (shortened bars) */
+    .b-stem { width: 14px; height: 100%; left: 0; top: 0; }
+    /* Horizontal bars stop short of full width for rounded look */
+    .b-top { width: 38px; height: 14px; left: 14px; top: 0; }
+    .b-mid { width: 38px; height: 14px; left: 14px; top: 38px; }
+    .b-bot { width: 38px; height: 14px; left: 14px; bottom: 0; }
+    /* Right segments tucked between bars */
+    .b-r-top { width: 14px; height: 24px; right: 0; top: 14px; }
+    .b-r-bot { width: 14px; height: 24px; right: 0; bottom: 14px; }
+
+    /* I SHAPE */
+    .i-top { width: 100%; height: 14px; top: 0; left: 0; }
+    .i-bot { width: 100%; height: 14px; bottom: 0; left: 0; }
+    .i-stem { width: 14px; height: 62px; left: 23px; top: 14px; }
+
+    /* T SHAPE */
+    .t-top { width: 100%; height: 14px; top: 0; left: 0; }
+    .t-stem { width: 14px; height: 76px; left: 23px; top: 14px; }
+
+    /* RANDOM DELAY UTILITIES (0.1s to 2.5s) */
+    .d-1 { animation-delay: 0.1s; }
+    .d-2 { animation-delay: 0.2s; }
+    .d-3 { animation-delay: 0.3s; }
+    .d-4 { animation-delay: 0.4s; }
+    .d-5 { animation-delay: 0.5s; }
+    .d-6 { animation-delay: 0.6s; }
+    .d-7 { animation-delay: 0.7s; }
+    .d-8 { animation-delay: 0.8s; }
+    .d-9 { animation-delay: 0.9s; }
+    .d-10 { animation-delay: 1.0s; }
+    .d-11 { animation-delay: 1.1s; }
+    .d-12 { animation-delay: 1.2s; }
+    .d-13 { animation-delay: 1.3s; }
+    .d-14 { animation-delay: 1.4s; }
+    .d-15 { animation-delay: 1.5s; }
+    .d-16 { animation-delay: 1.6s; }
+    .d-17 { animation-delay: 1.7s; }
+    .d-18 { animation-delay: 1.8s; }
+    .d-19 { animation-delay: 1.9s; }
+    .d-20 { animation-delay: 2.0s; }
+    .d-21 { animation-delay: 2.1s; }
+    .d-22 { animation-delay: 2.2s; }
+    .d-23 { animation-delay: 2.3s; }
+    .d-24 { animation-delay: 2.4s; }
+    .d-25 { animation-delay: 2.5s; }
+
+    @keyframes fall-in {
+      0% { transform: translateY(-400px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes fade-in { to { opacity: 1; } }
+
+    @media (max-width: 768px) {
+      .logo-construction { transform: scale(0.6); gap: 15px; margin: 20px 0; }
+    }
+    @media (max-width: 480px) {
+      .logo-construction { transform: scale(0.4); gap: 10px; margin: 0; }
+      .hero-section { padding-top: 40px; }
+    }
+
+    /* "Till 460px it is perfect" -> Adjust below 460px */
+    @media (max-width: 460px) {
+      .hero-section {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .logo-construction {
+        /* Decrease inner padding (gap) and scale slightly */
+        gap: 6px;
+        transform: scale(0.35); 
+      }
+    }
+
+    @media (max-width: 360px) {
+      .hero-section {
+        padding-left: 4px;
+        padding-right: 4px;
+      }
+      .logo-construction {
+        /* Tightest fit for very small screens */
+        gap: 4px;
+        transform: scale(0.3);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title { font-size: 2.5rem; }
+      .hero-subtitle { font-size: 1.1rem; }
+      .header-tagline { display: none; }
+    }
+
+    /* Small Screen Optimization (< 355px) */
+    @media (max-width: 355px) {
+      .content-layout {
+        padding: 40px 10px; /* Reduce horizontal padding */
+      }
+      .rec-card {
+        padding: 20px; /* Reduce internal card padding */
+      }
+    }
+  </style>
+  <script src="theme-init.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="index.html" class="header-brand">
+      <span class="brand-logo-text">BIT<span class="brand-connector">by</span>BIT</span>
+    </a>
+    <div class="header-status">
+      <span class="header-tagline">
+        Breaking down tech <br> one bit at a time
+      </span>
+      <button id="themeToggle" title="Toggle Theme">
+        <svg id="iconSun" viewBox="0 0 24 24" style="display: block;">
+          <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
+        </svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" style="fill: none; stroke: var(--text-sub); stroke-width: 2; display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+    
+    <!-- HERO SECTION -->
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+      <div class="hero-container">
+        
+        <div class="hero-meta-top">// WELCOME</div>
+
+        <!-- FALLING BLOCK LOGO -->
+        <div class="logo-construction">
+          
+          <!-- B -->
+          <div class="c-letter">
+            <!-- Letters are built in random order now -->
+            <div class="c-block b-stem d-15"></div>
+            <div class="c-block b-top d-3"></div>
+            <div class="c-block b-mid d-21"></div>
+            <div class="c-block b-bot d-8"></div>
+            <div class="c-block b-r-top d-12"></div>
+            <div class="c-block b-r-bot d-1"></div>
+          </div>
+          
+          <!-- I -->
+          <div class="c-letter">
+             <div class="c-block i-top d-18"></div>
+             <div class="c-block i-stem d-5"></div>
+             <div class="c-block i-bot d-23"></div>
+          </div>
+
+          <!-- T -->
+          <div class="c-letter">
+             <div class="c-block t-top d-10"></div>
+             <div class="c-block t-stem d-2"></div>
+          </div>
+
+          <!-- by -->
+          <div class="logo-word-by">by</div>
+
+          <!-- B (Second) -->
+          <div class="c-letter">
+            <div class="c-block b-stem d-4"></div>
+            <div class="c-block b-top d-19"></div>
+            <div class="c-block b-mid d-11"></div>
+            <div class="c-block b-bot d-24"></div>
+            <div class="c-block b-r-top d-7"></div>
+            <div class="c-block b-r-bot d-14"></div>
+          </div>
+          
+          <!-- I (Second) -->
+          <div class="c-letter">
+             <div class="c-block i-top d-22"></div>
+             <div class="c-block i-stem d-9"></div>
+             <div class="c-block i-bot d-6"></div>
+          </div>
+
+          <!-- T (Second) -->
+          <div class="c-letter">
+             <div class="c-block t-top d-16"></div>
+             <div class="c-block t-stem d-20"></div>
+          </div>
+
+        </div>
+
+        <p class="hero-subtitle">
+          Exploring complex technical concepts through visual storytelling. One bit at a time.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- CONTENT LAYOUT -->
+    <div class="content-layout">
+      <div class="articles-grid">
+        
+        <!-- CARD 1: TOONS -->
+        <a href="toons-blog.html" class="rec-card">
+          <span class="rec-badge">// NEWEST</span>
+          <h3>Understanding TOONs</h3>
+          <p class="rec-excerpt">
+            Why JSON is costing you money in LLM tokens, and how Token-Oriented Object Notation allows you to send 50% more data for the same price.
+          </p>
+          
+          <div class="rec-footer">
+            <div class="rec-meta">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                2026.01.17
+              </span>
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                12 Min Read
+              </span>
+            </div>
+            <div class="rec-btn">
+              Read Article <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- CARD 2: Placeholder for Future -->
+        <a href="#" class="rec-card" style="opacity: 0.6; pointer-events: none;">
+          <span class="rec-badge">COMING SOON</span>
+          <h3>The Anatomy of WebAssembly</h3>
+          <p class="rec-excerpt">
+            A deep dive into how WASM works under the hood and why it's changing the landscape of high-performance web applications.
+          </p>
+          
+          <div class="rec-footer">
+            <div class="rec-meta">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                TBA
+              </span>
+            </div>
+            <div class="rec-btn">
+              Stay Tuned
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="simple-footer">
+    <div class="footer-content">
+      <a href="index.html" class="footer-home-mark" title="Return Home">T</a>
+      <div class="footer-info">
+        <span>Bit by Bit Series • 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme Toggle
+    const themeBtn = document.getElementById('themeToggle');
+    const iconSun = document.getElementById('iconSun');
+    const iconMoon = document.getElementById('iconMoon');
+
+    // Function to update icons based on current theme
+    function updateThemeIcons() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+          iconSun.style.display = 'block';
+          iconMoon.style.display = 'none';
+      } else {
+          iconSun.style.display = 'none';
+          iconMoon.style.display = 'block';
+      }
+    }
+
+    // Initialize icons
+    updateThemeIcons();
+
+    themeBtn.onclick = () => {
+      window.ThemeManager.toggle();
+      updateThemeIcons();
+    };
+  </script>
+</body>
+</html>

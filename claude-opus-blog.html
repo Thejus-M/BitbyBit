@@ -1,0 +1,2631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Opus 4.6: The New Frontier in AI — Bit by Bit</title>
+  <meta name="description" content="Claude Opus 4.6 brings massive context windows, agent team collaboration, and enterprise-grade AI capabilities. Explore the latest evolution in Anthropic's flagship model.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Share+Tech+Mono&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      /* Light Theme (Paper-Like) */
+      --accent: #2A5D9C;
+      --accent-hover: #1e4575;
+      --accent-soft: rgba(42, 93, 156, 0.12);
+      --accent-bright: #2A5D9C;
+      --accent-glow: rgba(42, 93, 156, 0.3);
+
+      --bg-body: #E2DFD6;
+      --bg-card: #EBE8DF;
+      --bg-card-elevated: #EBE8DF;
+      --text-main: #262626;
+      --text-sub: #545454;
+      --text-code: #262626;
+      
+      --border: #CFCBC2;
+      --border-sub: #D9D6CD;
+      --grid-line: #D9D6CD;
+
+      --font-serif: 'EB Garamond', Georgia, serif;
+      --font-main: 'Inter', sans-serif;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono-sys: 'Share Tech Mono', monospace;
+      --font-mono-code: 'JetBrains Mono', monospace;
+      --font-pixel: 'Press Start 2P', cursive;
+    }
+
+    [data-theme="dark"] {
+      --accent: #5682B1;
+      --accent-hover: #739EC9;
+      --accent-soft: rgba(86, 130, 177, 0.2);
+      --accent-bright: #739EC9;
+      --accent-glow: rgba(86, 130, 177, 0.3);
+
+      --bg-body: #000000;
+      --bg-card: #0f0f0f;
+      --bg-card-elevated: #0f0f0f;
+      
+      --text-main: #6BA4D9;
+      --text-sub: #4A7091;
+      --text-code: #6BA4D9;
+      
+      --border: #4A7091;
+      --border-sub: #333333;
+      --grid-line: #111111;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      line-height: 1.6;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      background: var(--bg-card);
+      z-index: 500;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 20px rgba(0, 212, 255, 0.05);
+    }
+
+    .header-brand {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .brand-logo-text {
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      position: relative;
+      transition: all 0.3s ease;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-logo-text:hover {
+      transform: scale(1.05);
+    }
+
+    [data-theme="dark"] .brand-logo-text {
+      color: var(--accent-bright);
+    }
+
+    .brand-connector {
+      color: var(--text-sub);
+      font-size: 10px;
+      font-family: var(--font-mono-sys);
+      text-transform: lowercase;
+      font-weight: 300;
+      letter-spacing: 0;
+    }
+
+    .header-status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .header-tagline {
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    #themeToggle {
+      background: none;
+      border: 1px solid var(--border);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #themeToggle:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    #themeToggle svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--text-sub);
+    }
+
+    .page-wrapper {
+      padding-top: 60px;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-section {
+      padding: 100px 40px 80px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(77, 159, 255, 0.03) 0%, transparent 100%);
+    }
+
+    .hero-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 55% 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .hero-meta-top {
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 32px;
+      display: inline-block;
+      border: 1px solid var(--accent-soft);
+      padding: 6px 12px;
+      background: var(--bg-card-elevated);
+      border-radius: 0;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 5rem;
+      font-weight: 700;
+      line-height: 0.9;
+      color: var(--text-main);
+      margin-bottom: 40px;
+      letter-spacing: -2px;
+      text-transform: uppercase;
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+      max-width: 95%;
+      margin-bottom: 0;
+    }
+
+    .hero-visual-side {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      padding-top: 10px;
+    }
+
+    .hero-image-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px 40px;
+      padding: 24px;
+      border-top: 1px solid var(--border-sub);
+      border-bottom: 1px solid var(--border-sub);
+      background: rgba(77, 159, 255, 0.02);
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .meta-label {
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-icon {
+      width: 12px;
+      height: 12px;
+      stroke: var(--accent);
+    }
+
+    .meta-value {
+      font-family: var(--font-mono-sys);
+      font-size: 12px;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    [data-theme="light"] .meta-value {
+      font-weight: 600;
+      color: #000;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      color: var(--text-main);
+      background: var(--bg-card-elevated);
+      border: 1px solid var(--border-sub);
+      padding: 3px 8px;
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 60px;
+      padding: 60px 40px 0px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .meta-sidebar {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      padding-right: 20px;
+    }
+
+    .sidebar-mini-header {
+      margin-bottom: 40px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .meta-sidebar.scrolled .sidebar-mini-header {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .mini-title {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-main);
+      line-height: 1.2;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .mini-badge {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .toc-container {
+      padding-top: 20px;
+      border-top: 1px solid var(--border-sub);
+    }
+
+    .toc-label {
+        font-family: var(--font-mono-sys);
+        font-size: 10px;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .toc-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .toc-link {
+      font-family: var(--font-main);
+      font-size: 14px;
+      color: var(--text-sub);
+      text-decoration: none;
+      display: flex;
+      align-items: baseline;
+      padding: 6px 0;
+      gap: 12px;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .toc-link::before {
+      content: "+";
+      color: var(--text-sub);
+      font-family: var(--font-mono-sys);
+      font-size: 14px;
+      flex-shrink: 0;
+      width: 12px;
+      transition: color 0.2s;
+      opacity: 0.6;
+    }
+
+    .toc-link:hover {
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .toc-link:hover::before {
+      color: var(--accent);
+      opacity: 1;
+    }
+
+    .toc-link.active {
+      color: var(--accent);
+      font-weight: 600;
+      transform: translateX(4px);
+    }
+
+    .toc-link.active::before {
+      content: "→";
+      color: var(--accent);
+      opacity: 1;
+    }
+
+    .main-column {
+      min-width: 0;
+      max-width: 100%;
+      padding-right: 40px;
+      padding-left: 60px;
+    }
+
+    .article-content {
+      max-width: 1000px;
+    }
+
+    .article-content h2 {
+      font-family: var(--font-mono-sys);
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-top: 60px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: 120px;
+    }
+    
+    #intro {
+      scroll-margin-top: 120px;
+    }
+
+    .article-content h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-top: 40px;
+      margin-bottom: 20px;
+      letter-spacing: -0.5px;
+      scroll-margin-top: 120px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .article-content p {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: var(--text-main);
+      margin-bottom: 32px;
+    }
+
+    [data-theme="light"] .article-content p {
+      color: #050505;
+      font-weight: 500;
+    }
+
+    .article-content strong {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .article-content em {
+      font-style: italic;
+      color: var(--text-sub);
+    }
+
+    .article-content ul, .article-content ol {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: var(--text-main);
+      margin-bottom: 32px;
+      padding-left: 20px;
+    }
+
+    [data-theme="light"] .article-content ul,
+    [data-theme="light"] .article-content ol { color: #050505; font-weight: 500; }
+
+    .article-content li { margin-bottom: 12px; padding-left: 10px; }
+
+    .article-content a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent-soft);
+      transition: all 0.2s;
+    }
+
+    .article-content a:hover {
+      border-bottom-color: var(--accent);
+    }
+
+    .visual-block {
+      margin: 60px 0;
+      text-align: center;
+    }
+
+    .visual-block img {
+      width: 100%;
+      max-width: 900px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .visual-caption {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 16px;
+    }
+
+    .callout {
+      background: var(--bg-card);
+      border-top: 1px solid var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding: 32px;
+      margin: 40px 0;
+    }
+
+    [data-theme="light"] .callout { background: var(--bg-card); }
+
+    .callout-title {
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 80px 0;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 40px 0;
+      font-family: var(--font-mono-sys);
+      font-size: 12px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 16px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    .comparison-table th {
+      background: var(--bg-card);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .comparison-table td {
+      color: var(--text-main);
+    }
+
+    .star-rating {
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .resource-link {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 16px 24px;
+      margin-bottom: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .resource-link:hover {
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .resource-icon {
+      color: var(--accent);
+      font-family: var(--font-mono-sys);
+      font-size: 14px;
+    }
+
+    .resource-text {
+      flex: 1;
+      font-family: var(--font-main);
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .recommendations-section {
+      margin-top: 100px;
+      padding-top: 60px;
+      border-top: 1px solid var(--border);
+    }
+
+    .recommendations-header h2 {
+      font-family: var(--font-mono-sys);
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 40px;
+    }
+
+    .recommendations-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+    }
+
+    .rec-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 40px;
+      transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-shadow: 4px 4px 0 var(--border-sub);
+    }
+
+    .rec-card:hover {
+      border-color: var(--accent);
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--accent);
+    }
+
+    .rec-badge {
+      align-self: flex-start;
+      background: var(--border-sub);
+      color: var(--text-main);
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 8px 12px;
+      margin-bottom: 24px;
+      border-radius: 4px;
+    }
+
+    .rec-card h3 {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .rec-excerpt {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      color: var(--text-sub);
+      line-height: 1.6;
+      margin-bottom: 32px;
+      flex-grow: 1;
+    }
+
+    .rec-footer {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .rec-meta {
+      display: flex;
+      gap: 24px;
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .rec-meta span {
+      display: flex; align-items: center; gap: 8px;
+    }
+    
+    .rec-meta svg { width: 14px; height: 14px; stroke: currentColor; }
+
+    .rec-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      width: fit-content;
+      transition: all 0.2s;
+    }
+    
+    .rec-btn:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--bg-card);
+      cursor: pointer;
+    }
+
+    .simple-footer {
+      border-top: 1px solid var(--border);
+      padding: 80px 40px;
+      margin-top: 100px;
+      background: var(--bg-card);
+      position: relative;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .footer-home-mark {
+      font-family: var(--font-pixel);
+      font-size: 16px;
+      color: var(--accent);
+      text-decoration: none;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .footer-home-mark:hover {
+      transform: scale(1.1) translateY(-3px);
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+    }
+
+    .footer-home-mark::after {
+      content: ".";
+      color: var(--accent);
+    }
+    
+    .footer-info {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .scroll-indicator {
+      position: fixed; top: 60px; left: 0; height: 3px;
+      background: var(--accent); width: 0%; z-index: 600;
+      transition: width 0.1s ease-out; box-shadow: 0 0 10px var(--accent-glow);
+    }
+    
+    .mobile-toc-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 50px;
+      height: 50px;
+      background: var(--bg-card);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 990;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      display: none;
+    }
+
+    .mobile-toc-fab.hidden {
+      transform: scale(0.85);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mobile-toc-fab svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--accent);
+    }
+
+    .mobile-toc-fab:active {
+      transform: scale(0.95);
+    }
+
+    .mobile-toc-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      visibility: hidden;
+      pointer-events: none;
+      transition: visibility 0.3s;
+    }
+
+    .mobile-toc-overlay.active {
+      visibility: visible;
+      pointer-events: auto;
+    }
+    
+    .mobile-toc-backdrop {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .mobile-toc-overlay.active .mobile-toc-backdrop {
+      opacity: 1;
+    }
+
+    .mobile-toc-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50vh;
+      max-height: 92vh;
+      background: var(--bg-body);
+      border-radius: 24px 24px 0 0;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .mobile-toc-overlay.active .mobile-toc-sheet {
+      transform: translateY(0);
+    }
+    
+    .mobile-toc-sheet.expanded {
+      height: 92vh;
+    }
+    
+    .mobile-toc-handle-bar {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding-top: 12px;
+      padding-bottom: 8px;
+      flex-shrink: 0;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    .mobile-toc-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      opacity: 0.5;
+    }
+
+    .mobile-toc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px 24px 24px;
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    
+    .mobile-toc-header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mobile-toc-tag {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.7;
+    }
+    
+    .mobile-toc-title-main {
+      font-family: var(--font-main);
+      font-size: 1.1rem;
+      color: var(--text-main);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .mobile-toc-close {
+      background: var(--bg-card-elevated);
+      border: 1px solid var(--border);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      border-radius: 8px;
+      color: var(--text-sub);
+    }
+
+    .mobile-toc-close svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+    }
+    
+    .mobile-toc-content {
+      padding: 16px 24px 40px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    
+    .mobile-toc-content .toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .mobile-toc-content .toc-link {
+      font-family: var(--font-main);
+      font-size: 15px;
+      color: var(--text-sub);
+      text-decoration: none;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .mobile-toc-content .toc-link::before {
+      content: "+";
+      color: var(--accent);
+      font-family: var(--font-mono-sys);
+      font-size: 14px;
+      opacity: 0.7;
+    }
+    
+    .mobile-toc-content .toc-link.active {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    
+    .mobile-toc-content .toc-link.active::before {
+      content: "→";
+      opacity: 1;
+    }
+
+    @media (max-width: 1300px) {
+      .hero-title { font-size: 4rem; }
+      .content-layout { gap: 40px; }
+    }
+
+    @media (max-width: 1024px) {
+      .hero-container { grid-template-columns: 1fr; gap: 40px; }
+      .hero-visual-side { order: 0; }
+      .hero-image-wrapper { aspect-ratio: 16/9; }
+      
+      .content-layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 60px 40px 0px;
+      }
+      
+      .meta-sidebar {
+        display: none;
+      }
+      
+      .sidebar-mini-header { display: none; }
+      .toc-container { display: none; }
+
+      .main-column {
+        padding-right: 0;
+        padding-left: 0;
+      }
+
+      .mobile-toc-fab { display: flex; }
+    }
+
+    @media (max-width: 768px) {
+      .header { padding: 0 20px; }
+
+      .hero-section { padding: 60px 20px 40px; }
+      .hero-title { font-size: 2.5rem; }
+      .hero-subtitle { font-size: 1.25rem; }
+
+      .content-layout { padding: 40px 20px 0; }
+      
+      .main-column {
+        padding-right: 0;
+        padding-left: 0;
+      }
+
+      .recommendations-grid { grid-template-columns: 1fr; }
+      
+      .hero-meta-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px 16px;
+        padding: 20px 0;
+        border-left: none;
+        border-right: none;
+        background: transparent;
+      }
+      
+      .article-content h2 { font-size: 1.35rem; margin-top: 40px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 2rem;
+        line-height: 1.1;
+        word-break: break-word;
+      }
+      
+      .hero-subtitle { font-size: 1.1rem; }
+      
+      .header-tagline { display: none; }
+      .header-brand .brand-logo-text { font-size: 16px; }
+
+      .hero-section { padding: 40px 16px 30px; }
+      
+      .content-layout {
+        padding: 30px 16px 0;
+        gap: 20px;
+      }
+      
+      .hero-meta-grid {
+        gap: 16px 12px;
+        padding: 16px 0;
+      }
+      .meta-label { font-size: 8px; }
+      .meta-value { font-size: 11px; }
+
+      .simple-footer { padding: 60px 20px; }
+    }
+
+    /* CUSTOM VISUALIZATIONS */
+    
+    /* Hero Retro Computer Visualization */
+    .hero-viz-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-card);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+    }
+
+    .retro-computer-scene {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      transform: scale(0.9);
+      width: 100%;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .computer-assembly {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    .monitor-group {
+      position: relative;
+      z-index: 5;
+    }
+
+    .monitor-casing {
+      width: 280px;
+      height: 220px;
+      background: #EBE8DF;
+      border: 4px solid #CFCBC2;
+      border-radius: 20px 20px 10px 10px;
+      box-shadow: 
+        15px 0 0 #D9D6CD,
+        -5px 5px 15px rgba(0,0,0,0.2),
+        inset 0 0 20px rgba(0,0,0,0.05);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotateY(-5deg);
+    }
+
+    [data-theme="dark"] .monitor-casing {
+      background: #2a2a2a;
+      border-color: #333;
+      box-shadow: 15px 0 0 #222, -5px 5px 15px rgba(0,0,0,0.4);
+    }
+
+    .monitor-bezel {
+      width: 240px;
+      height: 180px;
+      background: #333;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .crt-screen {
+      width: 100%;
+      height: 100%;
+      background: #111;
+      border-radius: 4px; /* Curved screen look */
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+      border: 1px solid #444;
+    }
+
+    .scanlines {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 2px, 3px 100%;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .screen-glow {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05), rgba(0,0,0,0.4));
+      z-index: 11;
+      pointer-events: none;
+    }
+
+    .screen-content {
+      padding: 15px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px; /* Small terminal font */
+      color: #33d17a; /* Amber/Green phosphor */
+      line-height: 1.8;
+      text-shadow: 0 0 3px rgba(51, 209, 122, 0.5);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    [data-theme="light"] .screen-content { color: #333; background: #E0E0E0; text-shadow: none; font-weight: 700; }
+    [data-theme="light"] .crt-screen { background: #E0E0E0; }
+
+    .code-line {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 0;
+      animation: typing 2s steps(30, end) forwards;
+    }
+    
+    .code-line:nth-child(1) { animation-delay: 0.5s; }
+    .code-line:nth-child(2) { animation-delay: 1.5s; }
+    .code-line:nth-child(3) { animation-delay: 2.5s; }
+    .code-line:nth-child(4) { animation-delay: 3.5s; }
+    .blink { width: auto; animation: blink 1s step-end infinite; animation-delay: 4.5s; opacity: 0; }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    .monitor-controls {
+      position: absolute;
+      right: 15px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: #333;
+      padding: 5px;
+      border-radius: 4px;
+    }
+
+    .control-knob {
+      width: 12px;
+      height: 4px;
+      background: #666;
+    }
+
+    .monitor-stand {
+      width: 140px;
+      height: 30px;
+      background: #D9D6CD;
+      margin: 0 auto;
+      border: 3px solid #CFCBC2;
+      border-top: none;
+      position: relative;
+      z-index: 4;
+      box-shadow: 10px 0 0 #C4C1B6;
+    }
+    
+    .computer-base {
+      width: 320px;
+      height: 80px;
+      background: #EBE8DF;
+      border: 4px solid #CFCBC2;
+      border-radius: 4px;
+      margin-top: -10px;
+      position: relative;
+      z-index: 3;
+      box-shadow: 15px 15px 0 #D9D6CD;
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      gap: 20px;
+    }
+    
+    [data-theme="dark"] .computer-base {
+      background: #2a2a2a; border-color: #333; box-shadow: 15px 15px 0 #222;
+    }
+    
+    .floppy-drive {
+      width: 120px;
+      height: 12px;
+      background: #333;
+      border-bottom: 2px solid #666;
+    }
+    .base-badge { width: 40px; height: 12px; background: #CFCBC2; margin-left: auto; }
+    .power-switch { width: 20px; height: 16px; background: #D97757; border: 2px solid #b55d3f; }
+
+    .keyboard-unit {
+      width: 340px;
+      height: 60px;
+      background: #EBE8DF;
+      border: 4px solid #CFCBC2;
+      border-radius: 4px 4px 10px 10px;
+      margin-top: -20px;
+      margin-left: 40px;
+      transform: rotateX(20deg) translateZ(30px);
+      z-index: 6;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    [data-theme="dark"] .keyboard-unit { background: #2a2a2a; border-color: #333; }
+
+    .key-row {
+      height: 10px;
+      background: repeating-linear-gradient(90deg, #D9D6CD 0px, #D9D6CD 18px, transparent 18px, transparent 20px);
+      border-radius: 2px;
+    }
+    
+    .retro-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-start;
+      margin-left: 40px;
+    }
+    
+    .retro-title-main {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 3rem;
+      color: #000;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+    
+    [data-theme="dark"] .retro-title-main { color: #fff; }
+
+    .retro-title-sub {
+      font-family: 'EB Garamond', serif;
+      font-size: 2.5rem;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-style: italic;
+    }
+    
+    [data-theme="dark"] .retro-title-sub { color: #ccc; }
+    
+    .icon-star {
+      width: 14px; height: 14px;
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2;
+    }
+    .icon-star.filled {
+      fill: var(--accent);
+    }
+    
+    @media (max-width: 1024px) {
+      .retro-computer-scene { flex-direction: column; transform: scale(0.8); gap: 20px; }
+      .retro-title-group { align-items: center; margin-left: 0; margin-top: 20px; }
+      .retro-title-main { font-size: 2.5rem; text-align: center; }
+    }
+    
+    @media (max-width: 480px) {
+       .retro-computer-scene { transform: scale(0.6); gap: 10px; }
+       .hero-viz-container { min-height: 300px; }
+    }
+
+    /* Context Window Visualization */
+    .context-viz {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .token-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 4px, var(--accent-soft) 4px, var(--accent-soft) 5px),
+        repeating-linear-gradient(90deg, transparent, transparent 4px, var(--accent-soft) 4px, var(--accent-soft) 5px);
+      background-size: 20px 20px;
+      animation: scrollGrid 20s linear infinite;
+    }
+
+    @keyframes scrollGrid {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(20px, 20px); }
+    }
+
+    .context-overlay {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      background: var(--bg-body);
+      padding: 30px 50px;
+      border: 2px solid var(--accent);
+    }
+
+    .context-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-pixel);
+      font-size: 32px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .stat-label {
+      font-family: var(--font-mono-sys);
+      font-size: 12px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 8px;
+    }
+
+    .context-subtext {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--text-sub);
+      margin-top: 12px;
+      opacity: 0.7;
+    }
+
+    /* Agent Teams Visualization */
+    .agent-teams-viz {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .connection-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .conn-line {
+      stroke: var(--accent);
+      stroke-width: 2;
+      stroke-dasharray: 5, 5;
+      opacity: 0.3;
+      animation: dash 20s linear infinite;
+    }
+
+    @keyframes dash {
+      to { stroke-dashoffset: -1000; }
+    }
+
+    .central-orchestrator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: 100px;
+      background: var(--accent);
+      border: 2px solid var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+
+    .orchestrator-label {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--bg-body);
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .agent-circle {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .agent-1 { top: 15%; left: 10%; animation-delay: 0s; }
+    .agent-2 { top: 15%; right: 10%; animation-delay: 0.5s; }
+    .agent-3 { bottom: 15%; left: 10%; animation-delay: 1s; }
+    .agent-4 { bottom: 15%; right: 10%; animation-delay: 1.5s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .agent-label {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Model Comparison Visualization */
+    .model-comparison-viz {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 40px;
+    }
+
+    .comparison-bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .chart-row {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .chart-label {
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .chart-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .bar {
+      height: 28px;
+      background: var(--accent);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .bar span {
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--bg-body);
+      font-weight: 700;
+      letter-spacing: 1px;
+      position: absolute;
+      left: 12px;
+    }
+
+    .bar-claude {
+      background: var(--accent);
+      animation: slideIn 1s ease-out;
+    }
+
+    .bar-gpt {
+      background: rgba(42, 93, 156, 0.7);
+      animation: slideIn 1.2s ease-out;
+    }
+
+    .bar-gemini {
+      background: rgba(42, 93, 156, 0.4);
+      animation: slideIn 1.4s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { width: 0 !important; }
+    }
+
+    @media (max-width: 768px) {
+      .chart-row {
+        grid-template-columns: 100px 1fr;
+        gap: 12px;
+      }
+      .chart-label { font-size: 9px; }
+      .bar { height: 24px; }
+      .bar span { font-size: 8px; left: 8px; }
+      .model-comparison-viz { padding: 24px; }
+
+      .viz-label { font-size: 20px; }
+      .viz-sublabel { font-size: 9px; }
+      
+      .stat-value { font-size: 24px; }
+      .stat-label { font-size: 10px; }
+
+      .neural-network { gap: 40px; }
+      .neuron { width: 12px; height: 12px; }
+
+      .agent-circle { width: 50px; height: 50px; }
+      .agent-label { font-size: 8px; }
+      .central-orchestrator { width: 70px; height: 70px; }
+      .orchestrator-label { font-size: 8px; }
+    }
+  </style>
+  
+  <style>
+  /* Theme Image Loading/Error State */
+  .theme-image-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .theme-image-wrapper.loading::before,
+  .theme-image-wrapper.error::before {
+    content: "!";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 120px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--border);
+    opacity: 0.15;
+    z-index: 1;
+    text-align: center;
+    line-height: 1;
+  }
+  
+  .theme-image-wrapper.loading::before {
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  .theme-image-wrapper.loading::after {
+    content: "LOADING IMAGE...";
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono-sys);
+    font-size: 10px;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    z-index: 2;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .theme-image-wrapper.error::before {
+    opacity: 0.1;
+    color: var(--accent);
+  }
+  
+  .theme-image-wrapper.error::after {
+    /* Combine static text with dynamic alt text */
+    content: "IMAGE NOT LOADED: " attr(data-alt);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-mono-sys);
+    font-size: 10px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    z-index: 2;
+    text-align: center;
+    width: 90%;
+    line-height: 1.5;
+  }
+  
+  .theme-image-wrapper img {
+    width: 100%;
+    height: auto;
+    position: relative;
+    z-index: 3;
+    filter: blur(8px);
+    opacity: 0;
+    transition: all 0.5s ease;
+  }
+  
+  .theme-image-wrapper.loaded img {
+    filter: blur(0);
+    opacity: 1;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.05); }
+  }
+  </style>
+  <script src="theme-init.js"></script>
+  <script src="theme-image.js"></script>
+</head>
+
+<body>
+  <div class="scroll-indicator" id="scrollIndicator"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <a href="index.html" class="header-brand">
+      <span class="brand-logo-text">BIT<span class="brand-connector">by</span>BIT</span>
+    </a>
+    <div class="header-status">
+      <span class="header-tagline">
+        Breaking down tech <br> one bit at a time
+      </span>
+      <button id="themeToggle" title="Toggle Theme">
+        <svg id="iconSun" viewBox="0 0 24 24" style="display: block;">
+          <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
+        </svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" style="fill: none; stroke: var(--text-sub); stroke-width: 2; display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+    
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-container">
+        <!-- TEXT SIDE -->
+        <div class="hero-text-side">
+          <h1 class="hero-title">Claude Opus 4.6: The New Frontier in AI</h1>
+          <p class="hero-subtitle">
+            Anthropic's latest flagship model brings massive context windows, agent team collaboration, and enterprise-grade capabilities that are redefining what's possible with AI.
+          </p>
+        </div>
+
+        <!-- VISUAL + DATA SIDE -->
+        <div class="hero-visual-side">
+              <div class="hero-image-wrapper">
+                <div class="theme-image-wrapper loading" id="heroImageWrapper">
+                  <img 
+                    data-theme-src="image.png" 
+                    class="theme-image" 
+                    alt="Claude Opus 4.6 Retro Terminal"
+                  >
+                </div>
+              </div>
+          
+            <!-- Metadata -->
+            <div class="hero-meta-grid">
+                <div class="meta-item">
+                  <span class="meta-label">
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    Date
+                  </span>
+                  <span class="meta-value">2026.02.07</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Time
+                  </span>
+                  <span class="meta-value">15 Min Read</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    Series
+                  </span>
+                  <span class="meta-value">Bit by Bit</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                    Tags
+                  </span>
+                  <div class="tags-container">
+                    <span class="tag">AI / ML</span>
+                    <span class="tag">LLM</span>
+                    <span class="tag">Claude</span>
+                  </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTENT LAYOUT -->
+    <div class="content-layout">
+
+      <!-- LEFT SIDEBAR: Sticky TOC & Mini Header -->
+      <aside class="meta-sidebar" id="metaSidebar">
+        <!-- Hidden until scrolled past hero -->
+        <div class="sidebar-mini-header">
+          <div class="mini-badge">// NOW_READING</div>
+          <div class="mini-title">Claude Opus 4.6</div>
+        </div>
+
+        <nav class="toc-container">
+          <span class="toc-label">Contents</span>
+          <ul class="toc-list" id="tocList">
+            <li><a href="#intro" class="toc-link">Introduction</a></li>
+            <li><a href="#release-timeline" class="toc-link">Release Timeline</a></li>
+            <li><a href="#overview" class="toc-link">What is Claude Opus?</a></li>
+            <li><a href="#key-features" class="toc-link">Key Features</a></li>
+            <li><a href="#capabilities" class="toc-link">Core Capabilities</a></li>
+            <li><a href="#benchmarks" class="toc-link">Performance</a></li>
+            <li><a href="#comparison" class="toc-link">Model Comparison</a></li>
+            <li><a href="#safety" class="toc-link">Safety & Alignment</a></li>
+            <li><a href="#use-cases" class="toc-link">Use Cases</a></li>
+            <li><a href="#resources" class="toc-link">Official Resources</a></li>
+            <li><a href="#summary" class="toc-link">Summary</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- RIGHT COLUMN: Main Article -->
+      <main class="main-column">
+        <div class="article-content">
+          <p id="intro">
+            The AI landscape just shifted again. On <strong>February 5, 2026</strong>, Anthropic released <strong>Claude Opus 4.6</strong>—the latest and most powerful iteration of their flagship AI model. Building on the strong foundation of Opus 4.5, this release introduces game-changing features like a <em>one-million-token context window</em>, collaborative <em>agent teams</em>, and enhanced enterprise integrations that are setting new standards for what AI can accomplish.
+          </p>
+
+          <p>
+            Whether you're a developer building the next generation of AI applications, a researcher exploring the frontiers of machine learning, or an enterprise looking to leverage AI at scale, Claude Opus 4.6 represents a significant leap forward in capability, usability, and real-world impact.
+          </p>
+
+          <div class="divider"></div>
+
+          <h2 id="release-timeline">Release Timeline</h2>
+
+          <p>
+            <strong>Claude Opus 4.6</strong> was officially launched on <strong>February 5, 2026</strong>, marking a rapid evolution from its predecessor.
+          </p>
+
+          <ul>
+            <li><strong>Claude Opus 4.5:</strong> Released November 24, 2025</li>
+            <li><strong>Claude Opus 4.6:</strong> Released February 5, 2026</li>
+          </ul>
+
+          <p>
+            This accelerated release cycle demonstrates Anthropic's commitment to continuous improvement and their responsiveness to user feedback and emerging AI capabilities.
+          </p>
+
+          <h2 id="overview">What is Claude Opus?</h2>
+
+          <p>
+            Claude Opus represents the pinnacle of Anthropic's <strong>Claude family</strong> of large language models. Unlike simpler chatbots, Opus is engineered for <em>complex, multi-step reasoning tasks</em> that demand both depth and breadth of understanding.
+          </p>
+
+          <p>
+            While earlier iterations like Claude Opus 4.5 focused on advanced reasoning and productivity, <strong>Opus 4.6</strong> takes these capabilities to unprecedented levels by introducing:
+          </p>
+
+          <ul>
+            <li>Massive context processing (1M tokens)</li>
+            <li>Multi-agent collaboration systems</li>
+            <li>Fine-grained API controls for developers</li>
+            <li>Enterprise-grade document and workflow automation</li>
+          </ul>
+
+          <h2 id="key-features">Key Features & Improvements</h2>
+
+          <h3>Massive Context Window</h3>
+
+          <p>
+            Perhaps the most striking upgrade is the <strong>one-million-token context window</strong> currently in beta. To put this in perspective, that's approximately 750,000 words—enough to process entire novels, comprehensive codebases, or extensive legal documents in a single session.
+          </p>
+
+          <div class="visual-block">
+            <div class="context-viz" id="contextViz">
+              <div class="token-grid">
+              </div>
+              <div class="context-overlay">
+                <div class="context-stat">
+                  <div class="stat-value">1,000,000</div>
+                  <div class="stat-label">Tokens</div>
+                </div>
+                <div class="context-subtext">≈ 750,000 Words</div>
+              </div>
+            </div>
+            <p class="visual-caption">Visualization of 1,000,000 Token Context Capacity</p>
+          </div>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Ideal Use Cases for Large Context
+            </div>
+            <ul style="margin-bottom: 0;">
+              <li>Reviewing entire legal contracts and regulatory documents</li>
+              <li>Summarizing multi-chapter technical reports and research papers</li>
+              <li>Understanding and refactoring giant code repositories</li>
+              <li>Analyzing comprehensive datasets with full context retention</li>
+            </ul>
+          </div>
+
+          <h3>Agent Teams</h3>
+
+          <p>
+            Unlike previous versions that operate as single agents, Opus 4.6 introduces <strong>"agent teams"</strong>—multiple AI agents that can collaborate on different components of a complex project simultaneously.
+          </p>
+
+          <p>
+            Think of this as assembling a virtual engineering team, where each agent specializes in a specific task like testing, refactoring, documentation, or code review—all working in parallel to boost productivity exponentially.
+          </p>
+
+          <div class="visual-block">
+            <div class="agent-teams-viz" id="agentTeamsViz">
+              <div class="central-orchestrator">
+                <div class="orchestrator-label">ORCHESTRATOR</div>
+              </div>
+              <div class="agent-circle agent-1">
+                <div class="agent-label">CODE</div>
+              </div>
+              <div class="agent-circle agent-2">
+                <div class="agent-label">TEST</div>
+              </div>
+              <div class="agent-circle agent-3">
+                <div class="agent-label">DOCS</div>
+              </div>
+              <div class="agent-circle agent-4">
+                <div class="agent-label">REVIEW</div>
+              </div>
+              <svg class="connection-lines" viewBox="0 0 400 300">
+                <line class="conn-line" x1="200" y1="150" x2="80" y2="80" />
+                <line class="conn-line" x1="200" y1="150" x2="320" y2="80" />
+                <line class="conn-line" x1="200" y1="150" x2="80" y2="220" />
+                <line class="conn-line" x1="200" y1="150" x2="320" y2="220" />
+              </svg>
+            </div>
+            <p class="visual-caption">Multi-Agent Collaboration Architecture</p>
+          </div>
+
+          <h3>Enhanced API Features</h3>
+
+          <p>
+            Developers now get unprecedented control over Claude's behavior through advanced API features:
+          </p>
+
+          <ul>
+            <li><strong>Adaptive Thinking Modes:</strong> Balance speed versus depth of reasoning</li>
+            <li><strong>Effort Levels:</strong> Control how much internal reasoning the model expends</li>
+            <li><strong>Fine-Tuned System Messages:</strong> Better prompt engineering capabilities</li>
+          </ul>
+
+          <p>
+            These controls give you fine-grain precision for tasks ranging from quick lookups to deep expert-level analysis.
+          </p>
+
+          <h3>Enterprise Productivity Boost</h3>
+
+          <p>
+            Opus 4.6 isn't just for code—it's designed to handle real business workflows:
+          </p>
+
+          <ul>
+            <li>✔ Process complex spreadsheets and presentations</li>
+            <li>✔ Generate business analytics and financial reports</li>
+            <li>✔ Seamlessly integrate with Microsoft 365 and Google Workspace</li>
+            <li>✔ Perform legal document review and contract analysis</li>
+          </ul>
+
+          <p>
+            Users report exceptional performance in tasks like code migration, legal auditing, and resolving complex IT problems with high accuracy.
+          </p>
+
+          <h2 id="capabilities">Core Capabilities</h2>
+
+          <p>
+            Here's what makes the Claude Opus class stand out across the board:
+          </p>
+
+          <h3>Advanced Coding</h3>
+
+          <ul>
+            <li>Exceptional at long-running, multi-file software tasks</li>
+            <li>Handles complex refactoring and autonomous coding workflows</li>
+            <li>Outperforms prior iterations and many current AI models in benchmarks</li>
+          </ul>
+
+          <h3>Reasoning & Deep Understanding</h3>
+
+          <p>
+            Opus models are specifically designed for <em>complex reasoning</em>—integrating human-level planning with multi-stage problem solving across diverse domains.
+          </p>
+
+          <h3>Multimodal Work</h3>
+
+          <ul>
+            <li>Can work with text, code, documents, and images</li>
+            <li>Excellent at summarizing and integrating information from mixed inputs</li>
+            <li>Understands visual diagrams, charts, and technical illustrations</li>
+          </ul>
+
+          <h2 id="benchmarks">Benchmarks & Performance</h2>
+
+          <p>
+            While Opus 4.6 is so new that official benchmark numbers are still emerging, earlier Opus models set high bars in industry evaluations:
+          </p>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              Performance Highlights
+            </div>
+            <p style="margin-bottom: 0;">
+              <strong>Claude Opus 4.5</strong> was shown to lead in coding and reasoning evaluations, frequently surpassing or matching leading contenders in coding benchmark tests. These performance gains translate into better developer experiences and fewer iterations to solve complex problems.
+            </p>
+          </div>
+
+          <h2 id="comparison">Comparison With Other AI Models</h2>
+
+          <p>
+            Compared to other state-of-the-art systems like OpenAI GPT-5.x or Gemini 3 Pro, Claude Opus models excel particularly in specific domains:
+          </p>
+
+          <div class="visual-block">
+            <div class="model-comparison-viz" id="modelComparisonViz">
+              <div class="comparison-bar-chart">
+                <div class="chart-row">
+                  <div class="chart-label">Code Reasoning</div>
+                  <div class="chart-bars">
+                    <div class="bar bar-claude" style="width: 95%;"><span>Claude</span></div>
+                    <div class="bar bar-gpt" style="width: 92%;"><span>GPT-5</span></div>
+                    <div class="bar bar-gemini" style="width: 75%;"><span>Gemini</span></div>
+                  </div>
+                </div>
+                <div class="chart-row">
+                  <div class="chart-label">Long Context</div>
+                  <div class="chart-bars">
+                    <div class="bar bar-claude" style="width: 100%;"><span>Claude</span></div>
+                    <div class="bar bar-gpt" style="width: 85%;"><span>GPT-5</span></div>
+                    <div class="bar bar-gemini" style="width: 70%;"><span>Gemini</span></div>
+                  </div>
+                </div>
+                <div class="chart-row">
+                  <div class="chart-label">Agent Collaboration</div>
+                  <div class="chart-bars">
+                    <div class="bar bar-claude" style="width: 90%;"><span>Claude</span></div>
+                    <div class="bar bar-gpt" style="width: 75%;"><span>GPT-5</span></div>
+                    <div class="bar bar-gemini" style="width: 55%; "><span>Gemini</span></div>
+                  </div>
+                </div>
+                <div class="chart-row">
+                  <div class="chart-label">Enterprise</div>
+                  <div class="chart-bars">
+                    <div class="bar bar-claude" style="width: 92%;"><span>Claude</span></div>
+                    <div class="bar bar-gpt" style="width: 80%;"><span>GPT-5</span></div>
+                    <div class="bar bar-gemini" style="width: 78%;"><span>Gemini</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="visual-caption">Technical Capability Comparison</p>
+          </div>
+
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Capability</th>
+                <th>Claude Opus 4.6</th>
+                <th>GPT-5 Series</th>
+                <th>Gemini 3 Pro</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Code Reasoning</td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>Long Context</td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>Agent Collaboration</td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>Enterprise Features</td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>Overall Performance</td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+                <td>
+                  <span class="star-rating">
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p style="font-size: 0.9rem; color: var(--text-sub); font-style: italic;">
+            * Based on early reports & comparative commentary
+          </p>
+
+          <h2 id="safety">Safety & Alignment</h2>
+
+          <p>
+            Anthropic has consistently emphasized <strong>AI safety and alignment</strong> as core design priorities—especially in Opus releases. Earlier system cards report very high harmless response rates across diverse languages and interaction patterns.
+          </p>
+
+          <p>
+            The company's Constitutional AI approach ensures that Claude maintains helpful, harmless, and honest behavior even at massive scale and with complex multi-agent interactions.
+          </p>
+
+          <h2 id="use-cases">Real-World Use Cases</h2>
+
+          <p>
+            Here are practical ways developers, researchers, and tech professionals can leverage Claude Opus 4.6:
+          </p>
+
+          <h3>For Developers</h3>
+
+          <ul>
+            <li>Write production-level code with comprehensive test coverage</li>
+            <li>Automate complex refactoring tasks across large codebases</li>
+            <li>Build sophisticated AI agents with reusable workflows</li>
+            <li>Debug and optimize performance bottlenecks</li>
+          </ul>
+
+          <h3>For Enterprise Users</h3>
+
+          <ul>
+            <li>Summarize quarterly financial reports and regulatory filings</li>
+            <li>Generate interactive dashboards from raw business data</li>
+            <li>Create and edit comprehensive presentations</li>
+            <li>Automate contract review and compliance checking</li>
+          </ul>
+
+          <h3>For AI Researchers</h3>
+
+          <ul>
+            <li>Explore long-context reasoning at unprecedented scales</li>
+            <li>Build and test collaborative multi-agent systems</li>
+            <li>Investigate alignment and control mechanisms</li>
+            <li>Benchmark against other state-of-the-art models</li>
+          </ul>
+
+          <h2 id="resources">Official Resources</h2>
+
+          <p>
+            Here are the authoritative sources for learning more about Claude Opus 4.6:
+          </p>
+
+          <a href="https://platform.claude.com/docs/en/about-claude/models/overview" target="_blank" rel="noopener noreferrer" class="resource-link">
+            <span class="resource-icon">→</span>
+            <span class="resource-text"><strong>Anthropic Claude Family Overview</strong> — Model releases & context information</span>
+          </a>
+
+          <a href="https://www.anthropic.com/claude-opus-4-5-system-card" target="_blank" rel="noopener noreferrer" class="resource-link">
+            <span class="resource-icon">→</span>
+            <span class="resource-text"><strong>Claude Opus 4.5 System Card</strong> — Technical characteristics and benchmarks</span>
+          </a>
+
+          <a href="https://platform.claude.com/docs/en/about-claude/models/whats-new-claude-4-6" target="_blank" rel="noopener noreferrer" class="resource-link">
+            <span class="resource-icon">→</span>
+            <span class="resource-text"><strong>API Docs: What's New in Claude 4.6</strong> — Details on adaptive thinking and new features</span>
+          </a>
+
+          <a href="https://www.youtube.com/watch?v=example" target="_blank" rel="noopener noreferrer" class="resource-link">
+            <span class="resource-icon">→</span>
+            <span class="resource-text"><strong>Bloomberg Video on Claude Opus 4.6</strong> — Anthropic updates its AI model</span>
+          </a>
+
+          <h2 id="summary">Summary: Why Claude Opus 4.6 Matters</h2>
+
+          <p>
+            Claude Opus 4.6 isn't just another incremental language model release—it's a <strong>leap toward AI that handles long-form context, collaborates via agent teams, and brings enterprise strength to everyday workflows.</strong>
+          </p>
+
+          <p>
+            The February 2026 launch  places it at the cutting edge of modern AI, rivaling top models in capabilities while setting fresh benchmarks for real-world usefulness. Whether you're building the next generation of AI-powered applications, conducting cutting-edge research, or transforming enterprise workflows, Claude Opus 4.6 represents a powerful new tool in your arsenal.
+          </p>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              Ready to Get Started?
+            </div>
+            <p style="margin-bottom: 0;">
+              Visit the <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude Platform</a> to start experimenting with Opus 4.6 today, or check out the <a href="https://platform.claude.com/docs" target="_blank" rel="noopener noreferrer">API documentation</a> to integrate it into your applications.
+            </p>
+          </div>
+
+          <!-- Recommendations Section -->
+          <section class="recommendations-section">
+            <div class="recommendations-header">
+              <h2>→ Continue Reading</h2>
+            </div>
+
+            <div class="recommendations-grid">
+              <a href="toons-blog.html" class="rec-card">
+                <div class="rec-badge">Blog</div>
+                <h3>Understanding TOONs</h3>
+                <p class="rec-excerpt">
+                  Why JSON is costing you money in LLM tokens, and how Token-Oriented Object Notation allows you to send 50% more data for the same price.
+                </p>
+                <div class="rec-footer">
+                  <div class="rec-meta">
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                      2026.01.17
+                    </span>
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      12 Min
+                    </span>
+                  </div>
+                  <div class="rec-btn">Read Article →</div>
+                </div>
+              </a>
+
+              <a href="index.html" class="rec-card">
+                <div class="rec-badge">Home</div>
+                <h3>Explore More Topics</h3>
+                <p class="rec-excerpt">
+                  Discover our collection of in-depth technical articles breaking down complex technologies into digestible, visual explanations.
+                </p>
+                <div class="rec-footer">
+                  <div class="rec-meta">
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                      Homepage
+                    </span>
+                  </div>
+                  <div class="rec-btn">Browse All →</div>
+                </div>
+              </a>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="simple-footer">
+    <div class="footer-content">
+      <a href="index.html" class="footer-home-mark" title="Return Home">T</a>
+      <div class="footer-info">
+        <span>Bit by Bit Series • 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MOBILE TOC ELEMENTS -->
+  <button id="mobileTocBtn" class="mobile-toc-fab" aria-label="Open Table of Contents" onclick="document.getElementById('mobileTocOverlay').classList.add('active')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <div id="mobileTocOverlay" class="mobile-toc-overlay">
+    <div class="mobile-toc-backdrop" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')"></div>
+    
+    <div class="mobile-toc-sheet" id="mobileTocSheet">
+      <div class="mobile-toc-handle-bar">
+        <div class="mobile-toc-handle"></div>
+      </div>
+      
+      <div class="mobile-toc-header">
+        <div class="mobile-toc-header-text">
+          <span class="mobile-toc-tag">// BIT_BY_BIT_LOG</span>
+          <span class="mobile-toc-title-main">Claude Opus 4.6</span>
+        </div>
+        
+        <button id="mobileTocClose" class="mobile-toc-close" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="mobile-toc-content" id="mobileTocContent">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Toggle
+    const themeBtn = document.getElementById('themeToggle');
+    const iconSun = document.getElementById('iconSun');
+    const iconMoon = document.getElementById('iconMoon');
+
+    function updateThemeIcons() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+          iconSun.style.display = 'block';
+          iconMoon.style.display = 'none';
+      } else {
+          iconSun.style.display = 'none';
+          iconMoon.style.display = 'block';
+      }
+    }
+
+    updateThemeIcons();
+
+    themeBtn.onclick = () => {
+      window.ThemeManager.toggle();
+      updateThemeIcons();
+    };
+
+    // Scroll Indicator
+    const scrollIndicator = document.getElementById('scrollIndicator');
+    window.addEventListener('scroll', () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
+      scrollIndicator.style.width = scrollPercent + '%';
+    });
+
+    // Sticky Sidebar & Small Title Animation
+    const heroSection = document.getElementById('heroSection');
+    const metaSidebar = document.getElementById('metaSidebar');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          metaSidebar.classList.add('scrolled');
+        } else {
+          metaSidebar.classList.remove('scrolled');
+        }
+      });
+    }, {
+      rootMargin: "-100px 0px 0px 0px",
+      threshold: 0
+    });
+
+    if(heroSection) {
+        observer.observe(heroSection);
+    }
+
+    // Active TOC
+    const sections = document.querySelectorAll('.article-content h2[id], #intro');
+    
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (window.scrollY >= (sectionTop - 200)) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      document.querySelectorAll('.toc-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // FAB Auto-Hide on Scroll
+    let lastScrollY = window.scrollY;
+    let scrollTimeout;
+    
+    window.addEventListener('scroll', () => {
+       const fabToCheck = document.getElementById('mobileTocBtn');
+       if (!fabToCheck) return;
+       
+       const currentScrollY = window.scrollY;
+       const scrollDelta = currentScrollY - lastScrollY;
+       
+       if (Math.abs(scrollDelta) > 5) {
+           fabToCheck.classList.add('hidden');
+       }
+       
+       lastScrollY = currentScrollY;
+       
+       clearTimeout(scrollTimeout);
+       scrollTimeout = setTimeout(() => {
+           fabToCheck.classList.remove('hidden');
+       }, 300);
+       
+    }, { passive: true });
+
+    // MOBILE TOC LOGIC
+    document.addEventListener('DOMContentLoaded', () => {
+        const mobileTocOverlay = document.getElementById('mobileTocOverlay');
+        const mobileTocSheet = document.getElementById('mobileTocSheet');
+        const mobileTocContent = document.getElementById('mobileTocContent');
+        const desktopTocList = document.getElementById('tocList');
+        const handleBar = document.querySelector('.mobile-toc-handle-bar');
+    
+        if (desktopTocList && mobileTocContent) {
+          mobileTocContent.innerHTML = '';
+          const clonedList = desktopTocList.cloneNode(true);
+          clonedList.removeAttribute('id');
+          mobileTocContent.appendChild(clonedList);
+          
+          mobileTocContent.querySelectorAll('.toc-link').forEach(link => {
+            link.addEventListener('click', () => mobileTocOverlay.classList.remove('active'));
+          });
+        }
+        
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        let startHeight = 0;
+        let isExpanded = false;
+        
+        const touchArea = document.querySelector('.mobile-toc-header');
+        
+        if (touchArea) {
+            touchArea.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+                isExpanded = mobileTocSheet.classList.contains('expanded');
+                startHeight = mobileTocSheet.offsetHeight;
+                
+                mobileTocSheet.style.transition = 'none';
+            }, { passive: false });
+            
+            touchArea.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+                
+                if (deltaY < 0) {
+                    e.preventDefault();
+                    
+                    if (!isExpanded) {
+                         const newHeight = startHeight + Math.abs(deltaY);
+                         mobileTocSheet.style.height = `${newHeight}px`;
+                         mobileTocSheet.style.transform = `translateY(0)`;
+                    }
+                } else {
+                    e.preventDefault();
+                     
+                     if (isExpanded) {
+                         const newHeight = Math.max(window.innerHeight * 0.5, startHeight - deltaY);
+                         mobileTocSheet.style.height = `${newHeight}px`;
+                     } else {
+                         mobileTocSheet.style.transform = `translateY(${deltaY}px)`;
+                     }
+                }
+            }, { passive: false });
+            
+            touchArea.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                mobileTocSheet.style.transition = '';
+                
+                const deltaY = currentY - startY;
+                
+                if (deltaY < -50) {
+                    mobileTocSheet.style.height = '';
+                    mobileTocSheet.classList.add('expanded');
+                    mobileTocSheet.style.transform = '';
+                } else if (deltaY > 50) {
+                    if (isExpanded) {
+                        mobileTocSheet.style.height = '';
+                        mobileTocSheet.classList.remove('expanded');
+                    } else {
+                        mobileTocOverlay.classList.remove('active');
+                        mobileTocSheet.style.transform = '';
+                    }
+                } else {
+                   mobileTocSheet.style.height = '';
+                   mobileTocSheet.style.transform = '';
+                }
+            });
+        }
+        
+        const openBtn = document.getElementById('mobileTocBtn');
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                 setTimeout(() => {
+                     const activeLink = mobileTocContent.querySelector('.toc-link.active');
+                     if (activeLink) {
+                         activeLink.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                     }
+                 }, 100);
+            });
+        }
+    });
+  </script>
+</body>
+</html>

@@ -1,321 +1,125 @@
-# Blog Post Creation Template - Bit by Bit Series
+# Blog Post Creation Template - Bit by Bit Series (v2.0)
 
-Use this template to create new blog posts following the established design language and structure.
+Use this template to create high-impact, technical blog posts for the Bit by Bit series. The design follows a hybrid "DUI" (Document UI) aesthetic, blending retro terminal vibes with a modern editorial layout.
 
-## Design System Requirements
+## 🏗️ Technical Architecture & Assets
 
-### Color Scheme
-
-- **Light Mode (Default):**
-  - Background: `#ffffff`
-  - Text: `#111111` / `#666666`
-  - Accent: `#2A5D9C` (Classic Blue)
-  - Borders: `#E5E5E5`
-
-- **Dark Mode:**
-  - Background: `#000000`
-  - Text: `#739EC9` / `#5682B1` (Blue tones)
-  - Accent: `#5682B1` (Steel Blue)
-  - Borders: `#5682B1`
-
-### Typography
-
-- **Headings:** Space Grotesk (display font)
-- **Body Text:** EB Garamond (serif)
-- **Code/Labels:** Share Tech Mono / JetBrains Mono
-- **Logo:** Press Start 2P (pixel font)
-
-### Layout Structure
-
-```
-┌─────────────────────────────────────────────────────┐
-│ Header (BIT by BIT logo + theme toggle)             │
-├─────────────────────────────────────────────────────┤
-│ Hero Section (Full Width)                           │
-│  ├─ Left (55%): Title, Subtitle                     │
-│  └─ Right (45%): Image + Metadata                   │
-├──────────────┬──────────────────────────────────────┤
-│ Sidebar      │ Main Content                         │
-│ (280px)      │ (Max 1000px width)                   │
-│              │                                      │
-│ - Mini Title │ - Article body                       │
-│ - TOC        │ - Code blocks                        │
-│              │ - Callouts                           │
-│              │ - Recommendations                    │
-├──────────────┴──────────────────────────────────────┤
-│ Footer (T. signature + copyright)                   │
-└─────────────────────────────────────────────────────┘
-```
-
-**Max Content Width:** 1400px (centered)
-
----
-
-## Content Template
-
-### 1. Hero Section
-
-```markdown
-**Category Label:** // [CATEGORY_NAME] (e.g., DATA_FORMAT_REVOLUTION)
-**Title:** [Main Topic - Keep it punchy and uppercase if possible]
-**Subtitle:** [One-sentence explanation of what the topic is about]
-```
-
-**Example:**
-
-- Category: `// DATA_FORMAT_REVOLUTION`
-- Title: `TOON: The Data Format That Saves Tokens`
-- Subtitle: `Token-Oriented Object Notation (TOON) is a new data format designed to be more efficient than JSON when communicating with Large Language Models.`
-
-### 2. Metadata (Right Column)
-
-- **Date:** YYYY.MM.DD format
-- **Time:** X Min Read
-- **Series:** "Bit by Bit"
-- **Tags:** 2-3 relevant tags (e.g., AI / ML, Web Dev, etc.)
-
-### 3. Table of Contents (Sidebar)
-
-Create 4-6 main sections with descriptive names:
-
-```
-- Introduction
-- [Problem Statement]
-- [How It Works / Architecture]
-- [Comparison / Benefits]
-- [When to Use / Applications]
-- [Limitations / Challenges]
-```
-
-### 4. Article Structure
-
-#### Introduction (1-2 paragraphs)
-
-- Hook the reader with a relatable problem or observation
-- Introduce the main concept
-- Preview the value proposition
-
-#### Problem Section
-
-- Clearly define the problem being solved
-- Use bullet points for clarity
-- Include a **Callout Box** for key insights or statistics
-
-**Callout Template:**
+All blog posts MUST link to the core shared assets to maintain consistency:
 
 ```html
-<div class="callout">
-  <div class="callout-title">
-    [Icon] Key Insight / Real Impact / Important Note
-  </div>
-  <p>[Important information that highlights impact or significance]</p>
-</div>
-```
+<!-- Styles -->
+<link rel="stylesheet" href="../assets/css/blog-common.css" />
 
-#### Technical Explanation
-
-- Break down how the solution works
-- Use **Code Blocks** for examples:
-
-```html
-<div class="code-block">
-  <span class="code-label">// [LANGUAGE] Example ([DESCRIPTOR])</span>
-  <code>[Your code here with proper syntax highlighting]</code>
-</div>
-```
-
-- Include **before/after comparisons** when relevant
-- Keep paragraphs to 2-4 sentences max for readability
-
-#### Comparison / Why It Matters
-
-- Quantify benefits (e.g., "50% reduction", "2x faster")
-- Compare to alternatives
-- Use real-world scenarios
-
-#### Practical Applications
-
-- When/where to use it
-- Best practices
-- Use cases as bullet points
-
-#### Limitations
-
-- Be honest about weaknesses
-- When NOT to use it
-- Current state of tooling/adoption
-
-### 5. Recommendations Section
-
-Include 2 related articles/resources:
-
-```html
-<div class="recommendations-grid">
-  <a href="[URL]" class="rec-card">
-    <span class="rec-meta">[Type: Tool/Concept/Tutorial]</span>
-    <h3>[Resource Title]</h3>
-    <p class="rec-excerpt">[Brief description]</p>
-  </a>
-</div>
+<!-- Scripts (at end of body) -->
+<script src="../assets/js/blog-common.js"></script>
+<script src="../assets/js/resource-cache-data.js"></script>
+<script src="../assets/js/resource-preview.js"></script>
 ```
 
 ---
 
-## Writing Style Guidelines
+## 🎨 Design System
 
-### Tone
+### 1. Color Palettes
 
-- **Professional but approachable** - like explaining to a smart colleague
-- **Direct and concise** - respect the reader's time
-- **Technically accurate** - no hand-waving
-- **Honest** - acknowledge limitations and trade-offs
+- **Light Mode ("Old Paper"):**
+  - Background: `#E2DFD6` (Warm Paper)
+  - Cards: `#EBE8DF`
+  - Text: `#262626` (Charcoal)
+  - Accents: `#2A5D9C` (Classic Navy)
+  - Borders: `#CFCBC2`
+- **Dark Mode ("Retro Terminal"):**
+  - Background: `#000000` (Pure Black)
+  - Cards: `#0f0f0f`
+  - Text: `#6BA4D9` (Terminal Blue)
+  - Accents: `#5682B1` (Steel Blue)
+  - Borders: `#4A7091`
 
-### Language
+### 2. Typography
 
-- Use **bold** for key terms and emphasis
-- Use `code formatting` for technical terms, variables, file names
-- Keep sentences crisp (max 25-30 words)
-- Use active voice
-- Break up text with headers, lists, and code blocks
-
-### Technical Depth
-
-- **Explain, don't assume** - define acronyms on first use
-- **Balance theory and practice** - explain WHY and HOW
-- **Use examples liberally** - concrete beats abstract
-- **Include actual code** - not pseudocode when possible
-
----
-
-## SEO & Metadata Best Practices
-
-### Title
-
-- 50-60 characters
-- Include main keyword
-- Make it clickable (promise value)
-
-### Subtitle/Meta Description
-
-- 120-155 characters
-- Expand on what the reader will learn
-- Include secondary keywords
-
-### Section Headers (H2)
-
-- Use descriptive, keyword-rich headers
-- Keep them scannable
-- Use parallel structure (all questions, all statements, etc.)
-
-### Image Alt Text (if adding custom images)
-
-- Descriptive and keyword-rich
-- Explain what the image shows
+- **Logos:** `Press Start 2P` (Pixel Font)
+- **Display/Headers:** `Space Grotesk` (700 weight for H2)
+- **Body Text:** `EB Garamond` (Serif, font-size 1.15rem, line-height 1.7)
+- **Technical UI/Labels:** `Share Tech Mono`
+- **Code:** `JetBrains Mono`
 
 ---
 
-## Prompt Template for AI Generation
+## 📐 Layout Structure
 
-```
-Create a technical blog post for the "Bit by Bit" series about [TOPIC].
+### 1. Header & Hero
 
-**Topic:** [Main Subject]
-**Target Audience:** [Software Engineers / Data Scientists / Web Developers / etc.]
-**Technical Level:** [Beginner / Intermediate / Advanced]
+- **Header:** Sticky top, `BIT by BIT` pixel logo, theme toggle.
+- **Hero Section:** Full-width. 55/45 split.
+  - **Left:** Large `H1` (Space Grotesk, punchy), Subtitle (Serif).
+  - **Right:** High-impact visualization (SVG animation, CSS 3D, or retro computer scene). Avoid generic stock images. Use `hero-viz-container`.
 
-**Required Structure:**
-1. Hero Section
-   - Category: // [CATEGORY_TAG]
-   - Title: [Punchy, uppercase-friendly title]
-   - Subtitle: [One-sentence explanation]
+### 2. Main Body (2-Column)
 
-2. Metadata
-   - Series: Bit by Bit
-   - Tags: [3 relevant tags]
-   - Estimated read time: [X] minutes
+- **Max Width:** 1400px centered.
+- **Sidebar (280px):** Sticky TOC.
+  - TOC Markers: `+` (default), `→` (active).
+  - Mini Title that fades in on scroll.
+- **Content Column (1000px):**
+  - H2 Headers: Uppercase, Mono font, `border-bottom` 1px.
+  - Paragraphs: Max 4 sentences for readability.
+  - Callouts: Sharp corners, distinct accent border.
 
-3. Article Sections
-   - Introduction: [Hook + context]
-   - Problem: [What challenge does this solve?]
-   - How It Works: [Technical explanation with code examples]
-   - Comparison: [Benefits, trade-offs]
-   - When to Use: [Practical applications]
-   - Limitations: [Honest drawbacks]
+### 3. Official Resources (NEW)
 
-4. Recommendations: [2 related resources]
+A grid of "pinned note" cards before the recommendations.
 
-**Design Requirements:**
-- **Strictly Sharp Corners:** All UI elements (tags, code blocks, images, buttons) must have `border-radius: 0`. No rounded corners.
-- **Color Scheme:**
-  - **Light Mode:** "Old Paper" aesthetic (`#E2DFD6` bg, `#262626` text, `#CFCBC2` border).
-  - **Dark Mode:** "Terminal" aesthetic (`#000000` bg, `#6BA4D9` blue text accent).
-- **Recommendation Cards:**
-  - **Style:** "Tactile Paper" feel using `box-shadow: 4px 4px 0 var(--border-sub)`.
-  - **Hover:** Lift (-2px) and sharpen shadow to `var(--accent)`. Hard "bump" effect.
-  - **Structure:** Badge (Top Left), Serif Typography (Title/Excerpt), Footer with Metadata + "Read" Button.
-  - **Button:** Neutral border/text by default. Turns solid blue on *button hover only*.
-- **Sidebar Markers:** TOC links must use `+` for default state and `→` for active state (font size 14px).
-- **Layout:** Content max-width 1400px centered.
-- **Code Blocks:** Sharp corners, no negative margins (except on mobile), proper labels.
-- **Delimiters:** Use simple 1px solid line dividers between major sections.
-- **Callouts:** Sharp corners, minimal style.
-- **Typography:** Consistent with Bit by Bit series (Grotesk headers, Serif body, Mono technical data).
-- **Responsive Behavior:**
-  - **>1300px:** Spacious 2-column layout.
-  - **<1024px (Tablet):** Single column. Hero image sits BELOW text (`order: 0`). Sidebar (`.meta-sidebar`) is HIDDEN (`display: none`). Remove side padding on main column.
-  - **<768px (Mobile):** Hero metadata grid uses 2 columns (`repeat(2, 1fr)`). Tighter spacing.
-  - **<480px (Small Mobile):** Edge-to-edge code blocks/callouts (negative margins). Scaled down typography.
-- **Mobile TOC Feature:**
-  - **Style:** "Bottom Sheet" (50% max-height default, expandable to ~92%).
-  - **Interaction:** Drag handle to expand/collapse. Pull down to close. Backdrop click to close.
-  - **Behavior:** Auto-scroll to active section on open. Clones desktop TOC.
-  - **Design:** drag handle (pill), 2-line header (Tag + Title), solid background (no blur).
-  - **FAB Button:** 50x50px squircle with **8px border-radius**, centered hamburger icon, thin accent border. Hides on scroll (any direction), shows on stop (300ms delay).
-
-**Tone:** Professional, direct, technically accurate, honest about trade-offs
-
-**Special Instructions:**
-[Any topic-specific requirements or focus areas]
-```
+- **Class:** `.resource-card`
+- **Elements:** `.mini-clip` (SVG paperclip), `.resource-site` (Label), `.resource-header` (Title), `.resource-desc` (Short snippet).
+- **Aesthetic:** Subtle random rotation (`rotate(1.5deg)`), hard shadows, CRT/Paper thumbnail filters (handled by `resource-preview.js`).
 
 ---
 
-## Example Topics for Future Posts
+## ✍️ Content & Writing Tone
 
-- **Web Technologies:** WebAssembly, Service Workers, Web Components
-- **Data Science:** Model Compression, Quantization, ONNX Runtime
-- **DevOps:** Container Orchestration, CI/CD Patterns, Infrastructure as Code
-- **Architecture:** Microservices, Event Sourcing, CQRS
-- **Performance:** Tree Shaking, Code Splitting, Lazy Loading
-- **Security:** Zero Trust Architecture, OAuth 2.1, WebAuthn
+- **Hook:** Start with the "Why now?" – quantify the impact (e.g., "1M tokens", "50% cheaper").
+- **Voice:** "Pair-Programmer" tone. Technical, honest about trade-offs, direct.
+- **Visual Evidence:** Use CSS-only visualizations to explain concepts (isometric document stacks, flowing data streams, network nodes).
+- **Benchmarks:** Use comparison tables or callouts to show quantifiable improvements.
 
 ---
 
-## File Naming Convention
+## 🚀 Generation Workflow
 
-`[topic-slug]-blog.html`
+When generating a new post:
 
-Examples:
+1.  **Extract Core Sections:**
+    - Introduction
+    - The Problem (Technical debt/cost/bottleneck)
+    - Deep Dive / Architecture
+    - Real-World Use Cases
+    - Official Resources (Citations)
+    - Recommendations (Internal links)
 
-- `toon-blog.html`
-- `webassembly-blog.html`
-- `event-sourcing-blog.html`
+2.  **Visualization Ideas:**
+    - Propose a CSS-based visualization for the Hero section.
+    - Propose an interactive or animated diagram for the main technical section.
+
+3.  **Technical Verification:**
+    - Use `resource-cache-data.js` for thumbnails.
+    - Ensure all code blocks have correct language labels.
+    - Double-check reading time vs actual word count.
 
 ---
 
-## Final Checklist
+## 📱 Responsive Checklist
 
-Before publishing:
+- **Tablet (<1024px):** Hide sidebar, stack hero (viz below text).
+- **Mobile (<768px):** Tighter margins, 2-col metadata grid.
+- **Small Mobile (<480px):** Injected Negative margins for edge-to-edge content blocks.
+- **Mobile TOC:** Bottom sheet with drag handle, auto-populates from desktop TOC.
 
-- [ ] Hero section is complete with all metadata
-- [ ] TOC matches all H2 sections
-- [ ] Code blocks have labels and proper formatting
-- [ ] At least 1 callout box for emphasis
-- [ ] 2 recommendation cards at the end
-- [ ] Footer has "T." signature
-- [ ] Theme toggle works (test light/dark modes)
-- [ ] Content respects 1400px max-width boundary
-- [ ] No horizontal overflow on any element
-- [ ] All links are functional
-- [ ] All internal anchors (#intro, #problem, etc.) work
-- [ ] Reading time is accurate (150-200 words per minute)
+---
+
+## Final Review
+
+- [ ] No rounded corners (`border-radius: 0` everywhere except certain UI icons).
+- [ ] Typography follows the Serif/Sans split.
+- [ ] Dark mode text is "Terminal Blue" (#6BA4D9), NOT white.
+- [ ] Official Resources have the `mini-clip` SVG.
+- [ ] `resource-preview.js` and `resource-cache-data.js` are included.

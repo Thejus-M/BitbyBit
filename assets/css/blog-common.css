@@ -508,6 +508,15 @@ body::before {
 
 .article-content li { margin-bottom: 12px; padding-left: 10px; }
 
+.article-content ul.check-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.article-content ul.check-list li {
+  padding-left: 0;
+}
+
 .article-content a {
   color: var(--accent);
   text-decoration: none;

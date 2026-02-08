@@ -10,6 +10,7 @@ const BLOG_DATA = [
     date: "2026.02.07",
     readTime: "15 Min Read",
     link: "blogs/claude-opus-blog.html",
+    image: "assets/images/claude-thumbnail.png",
     tags: ["NEWEST"],
     isComingSoon: false
   },
@@ -20,6 +21,7 @@ const BLOG_DATA = [
     date: "2026.01.17",
     readTime: "12 Min Read",
     link: "blogs/toons-blog.html",
+    image: "",
     tags: [],
     isComingSoon: false
   },
@@ -30,6 +32,7 @@ const BLOG_DATA = [
     date: "TBA",
     readTime: "TBA",
     link: "#",
+    image: "",
     tags: ["COMING SOON"],
     isComingSoon: false
   }

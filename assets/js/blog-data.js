@@ -9,7 +9,7 @@ const BLOG_DATA = [
     excerpt: "Claude Opus 4.6 brings massive context windows, agent team collaboration, and enterprise-grade AI capabilities. Explore the latest evolution in Anthropic's flagship model.",
     date: "2026.02.07",
     readTime: "15 Min Read",
-    link: "claude-opus-blog.html",
+    link: "blogs/claude-opus-blog.html",
     tags: ["NEWEST"],
     isComingSoon: false
   },
@@ -19,7 +19,7 @@ const BLOG_DATA = [
     excerpt: "Why JSON is costing you money in LLM tokens, and how Token-Oriented Object Notation allows you to send 50% more data for the same price.",
     date: "2026.01.17",
     readTime: "12 Min Read",
-    link: "toons-blog.html",
+    link: "blogs/toons-blog.html",
     tags: [],
     isComingSoon: false
   },

@@ -1369,75 +1369,468 @@
        .hero-viz-container { min-height: 300px; }
     }
 
-    /* Context Window Visualization */
-    .context-viz {
+    /* ===============================================
+       CONTEXT WINDOW 3D VISUALIZATION
+       =============================================== */
+    .context-window-viz {
       position: relative;
       width: 100%;
-      height: 300px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      min-height: 700px;
+      background: #000000;
+      border: 1px solid #00D4FF;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 20px;
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.4);
     }
 
-    .token-grid {
+    [data-theme="light"] .context-window-viz {
+      background: linear-gradient(135deg, #E2DFD6 0%, #D1CEC5 100%);
+    }
+
+    /* Grid Background */
+    .viz-grid {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: 
-        repeating-linear-gradient(0deg, transparent, transparent 4px, var(--accent-soft) 4px, var(--accent-soft) 5px),
-        repeating-linear-gradient(90deg, transparent, transparent 4px, var(--accent-soft) 4px, var(--accent-soft) 5px);
-      background-size: 20px 20px;
-      animation: scrollGrid 20s linear infinite;
+      background-image:
+        linear-gradient(#00D4FF 1px, transparent 1px),
+        linear-gradient(90deg, #00D4FF 1px, transparent 1px);
+      background-size: 30px 30px;
+      opacity: 0.15;
+      z-index: 0;
     }
 
-    @keyframes scrollGrid {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(20px, 20px); }
+    /* Header */
+    .viz-header {
+      position: relative;
+      z-index: 10;
+      margin-bottom: 20px;
     }
 
-    .context-overlay {
+    .viz-title {
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      color: #00D4FF;
+      text-align: center;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+    }
+
+    .viz-stats {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      color: var(--text-sub);
+      letter-spacing: 1px;
+    }
+
+    .viz-stat-center {
+      color: #00D4FF;
+      font-weight: 700;
+      border: 1px solid #00D4FF;
+      padding: 4px 16px;
+      background: rgba(0, 212, 255, 0.15);
+    }
+
+    /* Container */
+    .viz-container {
+      position: relative;
+      height: 550px;
+      z-index: 5;
+    }
+
+    /* Y-Axis Scale */
+    .viz-scale {
+      position: absolute;
+      left: 20px;
+      top: 50px;
+      height: 400px;
+      width: 60px;
+      z-index: 15;
+    }
+
+    .scale-mark {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: #6BA4D9;
+    }
+
+    .scale-mark::before {
+      content: '';
+      width: 15px;
+      height: 1px;
+      background: #6BA4D9;
+    }
+
+    .scale-label {
+      position: absolute;
+      left: 0;
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      color: var(--text-sub);
+      letter-spacing: 2px;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+
+    /* Document Stack - 3D Isometric */
+    .document-stack {
+      position: absolute;
+      left: 50%;
+      top: 50px;
+      transform: translateX(-50%);
+      width: 450px;
+      height: 400px;
+      perspective: 1000px;
+      z-index: 10;
+    }
+
+    .doc-layer {
+      position: absolute;
+      width: 100%;
+      height: 120px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      transform-style: preserve-3d;
+      transform: 
+        translateY(calc(var(--layer) * -80px))
+        translateZ(calc(var(--layer) * 50px))
+        rotateX(60deg)
+        rotateZ(-5deg);
+      animation: layerFloat calc(3s + var(--layer) * 0.5s) ease-in-out infinite;
+      animation-delay: calc(var(--layer) * 0.2s);
+    }
+
+    @keyframes layerFloat {
+      0%, 100% { transform: translateY(calc(var(--layer) * -80px)) translateZ(calc(var(--layer) * 50px)) rotateX(60deg) rotateZ(-5deg); }
+      50% { transform: translateY(calc(var(--layer) * -80px - 5px)) translateZ(calc(var(--layer) * 50px)) rotateX(60deg) rotateZ(-5deg); }
+    }
+
+    .doc-item {
+      position: relative;
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.25) 0%, rgba(107, 164, 217, 0.15) 100%);
+      border: 1px solid #00D4FF;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono-sys);
+      font-size: 7px;
+      color: #FFFFFF;
+      padding: 4px;
+      text-align: center;
+      overflow: hidden;
+      box-shadow: 
+        0 4px 12px rgba(0, 212, 255, 0.3),
+        inset 0 1px 0 rgba(0, 212, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .doc-item {
+      background: linear-gradient(135deg, rgba(42, 93, 156, 0.9) 0%, rgba(42, 93, 156, 0.6) 100%);
+      color: white;
+    }
+
+    .doc-item::before {
+      content: attr(data-label);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      line-height: 1.2;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-item.code {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.3) 0%, rgba(107, 164, 217, 0.2) 100%);
+    }
+
+    .doc-item.data {
+      background: linear-gradient(135deg, rgba(0, 170, 212, 0.25) 0%, rgba(70, 140, 200, 0.15) 100%);
+    }
+
+    .doc-item:hover {
+      transform: scale(1.05);
+      box-shadow: 
+        0 8px 20px rgba(0, 212, 255, 0.7),
+        inset 0 1px 0 rgba(0, 212, 255, 0.3);
+    }
+
+    .layer-label {
+      position: absolute;
+      left: -150px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      color: #6BA4D9;
+      letter-spacing: 1px;
+      writing-mode: vertical-rl;
+      transform-origin: center;
+      transform: translateY(-50%) rotate(180deg);
+      white-space: nowrap;
+    }
+
+    /* Data Streams */
+    .data-streams {
+      position: absolute;
+      bottom: 100px;
+      left: 10%;
+      width: 40%;
+      height: 200px;
+      z-index: 8;
+    }
+
+    .stream-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .stream-path {
+      fill: none;
+      stroke: #00D4FF;
+      stroke-width: 2;
+      opacity: 0.6;
+      filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.8));
+      animation: streamFlow 2s ease-in-out infinite;
+    }
+
+    @keyframes streamFlow {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+
+    .stream-label {
+      position: absolute;
+      bottom: -20px;
+      left: 0;
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      color: var(--text-sub);
+      letter-spacing: 1px;
+    }
+
+    /* AI Core */
+    .ai-core {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 180px;
+      z-index: 12;
+    }
+
+    .core-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.6) 0%, transparent 70%);
+      animation: corePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes corePulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+    }
+
+    .core-chip {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 120px;
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #00D4FF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        0 0 30px rgba(0, 212, 255, 0.6),
+        inset 0 0 20px rgba(0, 212, 255, 0.3);
+      animation: chipGlow 3s ease-in-out infinite;
+    }
+
+    [data-theme="light"] .core-chip {
+      background: linear-gradient(135deg, rgba(42, 93, 156, 0.2) 0%, rgba(30, 69, 117, 0.3) 100%);
+    }
+
+    @keyframes chipGlow {
+      0%, 100% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), inset 0 0 20px rgba(0, 212, 255, 0.3); }
+      50% { box-shadow: 0 0 60px rgba(0, 212, 255, 0.9), inset 0 0 30px rgba(0, 212, 255, 0.5); }
+    }
+
+    .chip-circuit {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(90deg, #00D4FF 1px, transparent 1px),
+        linear-gradient(#00D4FF 1px, transparent 1px);
+      background-size: 10px 10px;
+      opacity: 0.25;
+    }
+
+    .chip-label {
       position: relative;
       z-index: 2;
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      color: #00D4FF;
       text-align: center;
-      background: var(--bg-body);
-      padding: 30px 50px;
-      border: 2px solid var(--accent);
+      line-height: 1.4;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
     }
 
-    .context-stat {
+    /* Output */
+    .viz-output {
+      position: absolute;
+      bottom: 80px;
+      right: 80px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 15;
+    }
+
+    .output-item {
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid #00D4FF;
+      padding: 12px;
+      min-width: 80px;
     }
 
-    .stat-value {
-      font-family: var(--font-pixel);
-      font-size: 32px;
-      color: var(--accent);
-      letter-spacing: 2px;
-      text-shadow: 0 0 15px var(--accent-glow);
+    [data-theme="light"] .output-item {
+      background: rgba(255, 255, 255, 0.9);
     }
 
-    .stat-label {
+    .output-icon {
+      font-size: 24px;
+    }
+
+    .output-label {
       font-family: var(--font-mono-sys);
-      font-size: 12px;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-top: 8px;
+      font-size: 7px;
+      color: #6BA4D9;
+      text-align: center;
+      line-height: 1.3;
+      letter-spacing: 0.5px;
     }
 
-    .context-subtext {
+    .output-arrow {
+      font-size: 20px;
+      color: #00D4FF;
+      animation: arrowPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes arrowPulse {
+      0%, 100% { opacity: 0.5; transform: translateX(0); }
+      50% { opacity: 1; transform: translateX(5px); }
+    }
+
+    /* Right Labels */
+    .viz-labels {
+      position: absolute;
+      right: 20px;
+      top: 50px;
+      height: 400px;
+      width: 100px;
+      z-index: 15;
+    }
+
+    .label-item {
+      position: absolute;
+      right: 0;
       font-family: var(--font-mono-sys);
-      font-size: 10px;
+      font-size: 8px;
+      color: #6BA4D9;
+      text-align: right;
+      line-height: 1.3;
+      letter-spacing: 0.5px;
+      padding-right: 20px;
+      border-right: 2px solid #6BA4D9;
+    }
+
+    /* Footer */
+    .viz-footer {
+      position: relative;
+      z-index: 10;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono-sys);
+      font-size: 7px;
       color: var(--text-sub);
-      margin-top: 12px;
-      opacity: 0.7;
+      letter-spacing: 1px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-center {
+      color: #00D4FF;
+      font-weight: 700;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .context-window-viz {
+        min-height: 500px;
+        padding: 10px;
+      }
+
+      .viz-title { font-size: 8px; }
+      .viz-stats { font-size: 6px; flex-direction: column; align-items: center; gap: 5px; }
+      
+      .document-stack {
+        width: 300px;
+        height: 300px;
+      }
+
+      .doc-layer {
+        height: 80px;
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .layer-label { left: -100px; font-size: 6px; }
+      
+      .viz-scale,
+      .viz-labels,
+      .data-streams { display: none; }
+
+      .viz-output {
+        bottom: 40px;
+        right: 20px;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .output-arrow { transform: rotate(90deg); }
+      .viz-footer { font-size: 6px; flex-direction: column; text-align: center; gap: 5px; }
     }
 
     /* Agent Teams Visualization */
@@ -1725,8 +2118,8 @@
     50% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.05); }
   }
   </style>
-  <script src="theme-init.js"></script>
-  <script src="theme-image.js"></script>
+  <script src="../assets/js/theme-init.js"></script>
+  <script src="../assets/js/theme-image.js"></script>
 </head>
 
 <body>
@@ -1770,7 +2163,7 @@
               <div class="hero-image-wrapper">
                 <div class="theme-image-wrapper loading" id="heroImageWrapper">
                   <img 
-                    data-theme-src="image.png" 
+                    data-theme-src="../assets/images/image.png" 
                     class="theme-image" 
                     alt="Claude Opus 4.6 Retro Terminal"
                   >
@@ -1856,22 +2249,7 @@
             Whether you're a developer building the next generation of AI applications, a researcher exploring the frontiers of machine learning, or an enterprise looking to leverage AI at scale, Claude Opus 4.6 represents a significant leap forward in capability, usability, and real-world impact.
           </p>
 
-          <div class="divider"></div>
-
-          <h2 id="release-timeline">Release Timeline</h2>
-
-          <p>
-            <strong>Claude Opus 4.6</strong> was officially launched on <strong>February 5, 2026</strong>, marking a rapid evolution from its predecessor.
-          </p>
-
-          <ul>
-            <li><strong>Claude Opus 4.5:</strong> Released November 24, 2025</li>
-            <li><strong>Claude Opus 4.6:</strong> Released February 5, 2026</li>
-          </ul>
-
-          <p>
-            This accelerated release cycle demonstrates Anthropic's commitment to continuous improvement and their responsiveness to user feedback and emerging AI capabilities.
-          </p>
+          
 
           <h2 id="overview">What is Claude Opus?</h2>
 
@@ -1898,21 +2276,6 @@
             Perhaps the most striking upgrade is the <strong>one-million-token context window</strong> currently in beta. To put this in perspective, that's approximately 750,000 words—enough to process entire novels, comprehensive codebases, or extensive legal documents in a single session.
           </p>
 
-          <div class="visual-block">
-            <div class="context-viz" id="contextViz">
-              <div class="token-grid">
-              </div>
-              <div class="context-overlay">
-                <div class="context-stat">
-                  <div class="stat-value">1,000,000</div>
-                  <div class="stat-label">Tokens</div>
-                </div>
-                <div class="context-subtext">≈ 750,000 Words</div>
-              </div>
-            </div>
-            <p class="visual-caption">Visualization of 1,000,000 Token Context Capacity</p>
-          </div>
-
           <div class="callout">
             <div class="callout-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1928,43 +2291,6 @@
               <li>Understanding and refactoring giant code repositories</li>
               <li>Analyzing comprehensive datasets with full context retention</li>
             </ul>
-          </div>
-
-          <h3>Agent Teams</h3>
-
-          <p>
-            Unlike previous versions that operate as single agents, Opus 4.6 introduces <strong>"agent teams"</strong>—multiple AI agents that can collaborate on different components of a complex project simultaneously.
-          </p>
-
-          <p>
-            Think of this as assembling a virtual engineering team, where each agent specializes in a specific task like testing, refactoring, documentation, or code review—all working in parallel to boost productivity exponentially.
-          </p>
-
-          <div class="visual-block">
-            <div class="agent-teams-viz" id="agentTeamsViz">
-              <div class="central-orchestrator">
-                <div class="orchestrator-label">ORCHESTRATOR</div>
-              </div>
-              <div class="agent-circle agent-1">
-                <div class="agent-label">CODE</div>
-              </div>
-              <div class="agent-circle agent-2">
-                <div class="agent-label">TEST</div>
-              </div>
-              <div class="agent-circle agent-3">
-                <div class="agent-label">DOCS</div>
-              </div>
-              <div class="agent-circle agent-4">
-                <div class="agent-label">REVIEW</div>
-              </div>
-              <svg class="connection-lines" viewBox="0 0 400 300">
-                <line class="conn-line" x1="200" y1="150" x2="80" y2="80" />
-                <line class="conn-line" x1="200" y1="150" x2="320" y2="80" />
-                <line class="conn-line" x1="200" y1="150" x2="80" y2="220" />
-                <line class="conn-line" x1="200" y1="150" x2="320" y2="220" />
-              </svg>
-            </div>
-            <p class="visual-caption">Multi-Agent Collaboration Architecture</p>
           </div>
 
           <h3>Enhanced API Features</h3>
@@ -2087,155 +2413,10 @@
                     <div class="bar bar-gemini" style="width: 78%;"><span>Gemini</span></div>
                   </div>
                 </div>
+                </div>
               </div>
-            </div>
             <p class="visual-caption">Technical Capability Comparison</p>
           </div>
-
-          <table class="comparison-table">
-            <thead>
-              <tr>
-                <th>Capability</th>
-                <th>Claude Opus 4.6</th>
-                <th>GPT-5 Series</th>
-                <th>Gemini 3 Pro</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Code Reasoning</td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td>Long Context</td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td>Agent Collaboration</td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td>Enterprise Features</td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td>Overall Performance</td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-                <td>
-                  <span class="star-rating">
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <svg class="icon-star filled" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <p style="font-size: 0.9rem; color: var(--text-sub); font-style: italic;">
-            * Based on early reports & comparative commentary
-          </p>
 
           <h2 id="safety">Safety & Alignment</h2>
 

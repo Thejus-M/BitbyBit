@@ -24,16 +24,5 @@ const BLOG_DATA = [
     image: "",
     tags: [],
     isComingSoon: false
-  },
-  {
-    id: "wasm-anatomy",
-    title: "The Anatomy of WebAssembly",
-    excerpt: "A deep dive into how WASM works under the hood and why it's changing the landscape of high-performance web applications.",
-    date: "TBA",
-    readTime: "TBA",
-    link: "#",
-    image: "",
-    tags: ["COMING SOON"],
-    isComingSoon: false
   }
 ];

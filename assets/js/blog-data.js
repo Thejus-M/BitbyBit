@@ -13,16 +13,5 @@ const BLOG_DATA = [
     image: "assets/images/claude-thumbnail.png",
     tags: ["NEWEST"],
     isComingSoon: false
-  },
-  {
-    id: "toons-blog",
-    title: "Understanding TOONs",
-    excerpt: "Why JSON is costing you money in LLM tokens, and how Token-Oriented Object Notation allows you to send 50% more data for the same price.",
-    date: "2026.01.17",
-    readTime: "12 Min Read",
-    link: "blogs/toons-blog.html",
-    image: "",
-    tags: [],
-    isComingSoon: false
   }
 ];

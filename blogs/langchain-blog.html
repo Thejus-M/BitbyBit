@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LangChain, LangGraph, LangSmith: Stop Confusing Them — Bit by Bit</title>
+  <meta name="description" content="Three tools, same prefix, completely different jobs. Here's the mental model that makes the whole LangChain ecosystem click.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Share+Tech+Mono&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/blog-common.css">
+  <style>
+    /* ============================================================
+       HERO: THREE-LAYER ARCHITECTURE STACK
+       ============================================================ */
+    .stack-hero-viz {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0;
+      padding: 40px 24px 20px;
+      background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-body) 100%);
+      overflow: hidden;
+    }
+
+    .stack-hero-viz::before {
+      content: "// SYS.ARCH.OVERVIEW";
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+    }
+
+    .stack-hero-viz::after {
+      content: "LIVE";
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      padding: 2px 8px;
+      border: 1px solid var(--accent);
+      animation: pulseDot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .stack-layer {
+      position: relative;
+      border: 1px solid var(--border);
+      margin-bottom: 6px;
+      overflow: hidden;
+      flex: 1;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+    }
+
+    .stack-layer-label {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    .stack-layer-name {
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent);
+      display: block;
+      line-height: 1;
+    }
+
+    .stack-layer-role {
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+      display: block;
+      margin-top: 5px;
+    }
+
+    /* LangSmith layer: scanning beam */
+    .stack-layer.ls {
+      background: var(--bg-body);
+      border-color: var(--accent);
+    }
+
+    .ls-scan {
+      position: absolute;
+      left: 140px;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
+
+    .ls-scan::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+      animation: scanBeam 2.8s ease-in-out infinite;
+    }
+
+    @keyframes scanBeam {
+      0% { left: -60px; opacity: 0.6; }
+      100% { left: 100%; opacity: 0.2; }
+    }
+
+    .ls-trace-lines {
+      position: absolute;
+      left: 150px;
+      right: 14px;
+      top: 14px;
+      bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .ls-trace-line {
+      height: 5px;
+      background: var(--accent);
+      opacity: 0;
+      animation: traceAppear 2.8s ease-in-out infinite;
+    }
+
+    .ls-trace-line:nth-child(1) { width: 80%; animation-delay: 0.1s; }
+    .ls-trace-line:nth-child(2) { width: 55%; margin-left: 14px; animation-delay: 0.5s; }
+    .ls-trace-line:nth-child(3) { width: 40%; margin-left: 14px; animation-delay: 0.9s; }
+    .ls-trace-line:nth-child(4) { width: 30%; margin-left: 28px; animation-delay: 1.2s; }
+
+    @keyframes traceAppear {
+      0%, 10% { opacity: 0; transform: scaleX(0); transform-origin: left; }
+      30%, 75% { opacity: 1; transform: scaleX(1); }
+      90%, 100% { opacity: 0.1; }
+    }
+
+    /* LangGraph layer: node graph */
+    .stack-layer.lg {
+      background: var(--bg-body);
+      border-color: var(--border);
+    }
+
+    .lg-nodes {
+      position: absolute;
+      left: 150px;
+      right: 14px;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .lg-node {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--accent);
+      background: var(--bg-card);
+      position: relative;
+      flex-shrink: 0;
+      animation: nodePulse 3s ease-in-out infinite;
+    }
+
+    .lg-node:nth-child(1) { animation-delay: 0s; }
+    .lg-node:nth-child(3) { animation-delay: 0.8s; }
+    .lg-node:nth-child(5) { animation-delay: 1.6s; }
+
+    @keyframes nodePulse {
+      0%, 80%, 100% { background: var(--bg-card); box-shadow: none; }
+      20%, 60% { background: var(--accent-soft); box-shadow: 0 0 10px var(--accent-glow); }
+    }
+
+    .lg-edge {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      position: relative;
+      min-width: 16px;
+    }
+
+    .lg-packet {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      top: -4px;
+      left: -4px;
+      animation: packetMove 3s ease-in-out infinite;
+    }
+
+    @keyframes packetMove {
+      0% { left: -4px; opacity: 0; }
+      10% { opacity: 1; }
+      45% { left: calc(100% - 4px); opacity: 1; }
+      55% { left: calc(100% - 4px); opacity: 0; }
+      100% { left: -4px; opacity: 0; }
+    }
+
+    .lg-loop {
+      position: absolute;
+      bottom: 8px;
+      left: 155px;
+      right: 14px;
+      height: 12px;
+    }
+
+    .lg-loop-line {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 0;
+      height: 1px;
+      background: var(--border);
+      border-bottom: 1px dashed var(--accent);
+      opacity: 0.5;
+    }
+
+    /* LangChain layer: pipeline flow */
+    .stack-layer.lc {
+      background: var(--bg-body);
+      border-color: var(--border);
+    }
+
+    .lc-pipe {
+      position: absolute;
+      left: 150px;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .lc-step {
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      letter-spacing: 1px;
+      color: var(--text-sub);
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      white-space: nowrap;
+      position: relative;
+      transition: all 0.2s;
+      animation: stepLight 5s ease-in-out infinite;
+    }
+
+    .lc-step:nth-child(1) { animation-delay: 0.0s; }
+    .lc-step:nth-child(3) { animation-delay: 0.7s; }
+    .lc-step:nth-child(5) { animation-delay: 1.4s; }
+    .lc-step:nth-child(7) { animation-delay: 2.1s; }
+
+    @keyframes stepLight {
+      0%, 60%, 100% { border-color: var(--border); color: var(--text-sub); }
+      10%, 40% { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    }
+
+    .lc-pipe-sym {
+      font-family: var(--font-mono-sys);
+      font-size: 14px;
+      color: var(--accent);
+      opacity: 0.5;
+    }
+
+    /* ============================================================
+       ANIMATION 1: LANGCHAIN LINEAR PIPELINE
+       ============================================================ */
+    .demo-viz {
+      position: relative;
+      width: 100%;
+      margin: 28px 0;
+      padding: 28px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .demo-viz::before {
+      content: attr(data-label);
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+    }
+
+    .demo-caption {
+      margin-top: 18px;
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--text-sub);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .pipeline-demo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding-top: 28px;
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pipe-box {
+      position: relative;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-body);
+      font-family: var(--font-mono-sys);
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .pipe-box-name {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+      display: block;
+    }
+
+    .pipe-box-type {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--accent);
+      display: block;
+      margin-top: 4px;
+      font-weight: 700;
+    }
+
+    .pipe-box.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+
+    .pipe-box:nth-child(1) { animation: pipeActive 6s ease-in-out infinite 0.0s; }
+    .pipe-box:nth-child(3) { animation: pipeActive 6s ease-in-out infinite 1.0s; }
+    .pipe-box:nth-child(5) { animation: pipeActive 6s ease-in-out infinite 2.0s; }
+    .pipe-box:nth-child(7) { animation: pipeActive 6s ease-in-out infinite 3.0s; }
+    .pipe-box:nth-child(9) { animation: pipeActive 6s ease-in-out infinite 4.0s; }
+
+    @keyframes pipeActive {
+      0%, 12% { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 14px var(--accent-glow); }
+      18% { border-color: var(--border); background: var(--bg-body); box-shadow: none; }
+      100% { border-color: var(--border); background: var(--bg-body); box-shadow: none; }
+    }
+
+    .pipe-arrow {
+      font-family: var(--font-mono-sys);
+      font-size: 18px;
+      color: var(--accent);
+      padding: 0 4px;
+      opacity: 0.6;
+    }
+
+    .pipe-op {
+      font-family: var(--font-mono-code);
+      font-size: 18px;
+      color: var(--accent);
+      padding: 0 6px;
+    }
+
+    .lcel-code {
+      margin-top: 20px;
+      text-align: center;
+      font-family: var(--font-mono-code);
+      font-size: 12px;
+      color: var(--accent);
+      padding: 10px 16px;
+      border: 1px dashed var(--border);
+      background: var(--bg-body);
+      letter-spacing: 1px;
+    }
+
+    /* ============================================================
+       ANIMATION 2: LANGGRAPH STATE MACHINE
+       ============================================================ */
+    .graph-demo {
+      padding-top: 28px;
+      padding-bottom: 8px;
+      position: relative;
+      min-height: 280px;
+    }
+
+    .graph-canvas {
+      position: relative;
+      width: 100%;
+      height: 240px;
+    }
+
+    .graph-node {
+      position: absolute;
+      width: 90px;
+      height: 52px;
+      border: 1px solid var(--border);
+      background: var(--bg-body);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono-sys);
+    }
+
+    .graph-node-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+    }
+
+    .graph-node-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+
+    .graph-node.start { left: 0; top: 50%; transform: translateY(-50%); }
+    .graph-node.agent { left: 50%; transform: translateX(-50%); top: 20px; }
+    .graph-node.tools { left: 50%; transform: translateX(-50%); top: 160px; }
+    .graph-node.end   { right: 0; top: 50%; transform: translateY(-50%); }
+
+    .graph-node.active {
+      animation: graphNodeActive 4s ease-in-out infinite;
+    }
+
+    .graph-node.start   { animation: graphNodeActive 4s ease-in-out infinite 0.0s; }
+    .graph-node.agent   { animation: graphNodeActive 4s ease-in-out infinite 0.7s; }
+    .graph-node.tools   { animation: graphNodeActive 4s ease-in-out infinite 1.8s; }
+    .graph-node.end     { animation: graphNodeActive 4s ease-in-out infinite 2.8s; }
+
+    @keyframes graphNodeActive {
+      0%, 10% { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 14px var(--accent-glow); }
+      25% { border-color: var(--border); background: var(--bg-body); box-shadow: none; }
+      100% { border-color: var(--border); background: var(--bg-body); box-shadow: none; }
+    }
+
+    .graph-edge-label {
+      position: absolute;
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      letter-spacing: 1px;
+      color: var(--text-sub);
+      background: var(--bg-card);
+      padding: 1px 5px;
+    }
+
+    .state-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      letter-spacing: 1px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      background: var(--bg-body);
+      padding: 4px 10px;
+      white-space: nowrap;
+      animation: stateBadgeMove 4s ease-in-out infinite;
+    }
+
+    @keyframes stateBadgeMove {
+      0%, 8%   { top: 50%; left: 8%;  transform: translateY(-50%); }
+      15%, 30% { top: 22%; left: 50%; transform: translate(-50%, 0); }
+      38%, 50% { top: 78%; left: 50%; transform: translate(-50%, 0); }
+      58%, 72% { top: 22%; left: 50%; transform: translate(-50%, 0); }
+      80%, 92% { top: 50%; right: 0;  left: auto; transform: translateY(-50%); }
+      100%      { top: 50%; left: 8%;  transform: translateY(-50%); opacity: 0; }
+    }
+
+    .cond-label {
+      position: absolute;
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .graph-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    .human-pause {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      padding: 4px 10px;
+      border: 1px dashed var(--accent);
+      background: var(--bg-body);
+      animation: pausePulse 4s ease-in-out infinite 2.2s;
+      opacity: 0;
+    }
+
+    @keyframes pausePulse {
+      0%, 5%  { opacity: 0; }
+      10%, 35% { opacity: 1; }
+      45%, 100% { opacity: 0; }
+    }
+
+    /* ============================================================
+       ANIMATION 3: LANGSMITH TRACE TREE
+       ============================================================ */
+    .trace-demo {
+      padding-top: 28px;
+      padding-bottom: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 24px;
+      min-height: 220px;
+      align-items: center;
+    }
+
+    .trace-app {
+      border: 1px solid var(--border);
+      background: var(--bg-body);
+      padding: 20px 16px;
+      font-family: var(--font-mono-sys);
+      position: relative;
+    }
+
+    .trace-app::before {
+      content: "YOUR APP";
+      position: absolute;
+      top: -9px;
+      left: 10px;
+      background: var(--bg-card);
+      padding: 0 6px;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+    }
+
+    .trace-req {
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: var(--text-sub);
+      margin-bottom: 10px;
+      padding: 5px 8px;
+      border: 1px solid var(--border);
+      animation: reqFlow 5s ease-in-out infinite;
+    }
+
+    @keyframes reqFlow {
+      0%, 5% { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+      20%, 100% { border-color: var(--border); color: var(--text-sub); background: transparent; }
+    }
+
+    .trace-req:nth-child(2) { animation-delay: 1.0s; }
+    .trace-req:nth-child(3) { animation-delay: 2.0s; }
+    .trace-req:nth-child(4) { animation-delay: 3.0s; }
+
+    .trace-tree {
+      border: 1px solid var(--accent);
+      background: var(--bg-body);
+      padding: 14px;
+      font-family: var(--font-mono-code);
+      position: relative;
+    }
+
+    .trace-tree::before {
+      content: "LANGSMITH TRACE";
+      position: absolute;
+      top: -9px;
+      left: 10px;
+      background: var(--bg-card);
+      padding: 0 6px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--accent);
+    }
+
+    .trace-span {
+      font-size: 10px;
+      padding: 4px 0;
+      color: var(--text-sub);
+      opacity: 0;
+      animation: spanAppear 5s ease-in-out infinite;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .trace-span:nth-child(1) { animation-delay: 0.1s; }
+    .trace-span:nth-child(2) { animation-delay: 0.8s; margin-left: 14px; }
+    .trace-span:nth-child(3) { animation-delay: 1.6s; margin-left: 14px; }
+    .trace-span:nth-child(4) { animation-delay: 2.4s; margin-left: 28px; }
+    .trace-span:nth-child(5) { animation-delay: 3.2s; margin-left: 28px; }
+
+    @keyframes spanAppear {
+      0%, 5% { opacity: 0; transform: translateX(-6px); }
+      12%, 80% { opacity: 1; transform: translateX(0); }
+      90%, 100% { opacity: 0.2; }
+    }
+
+    .span-name { color: var(--accent); }
+    .span-time { color: var(--text-sub); font-size: 9px; letter-spacing: 1px; }
+
+    /* ============================================================
+       COMPARISON TABLE
+       ============================================================ */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+    }
+
+    .compare-table th {
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--accent);
+      letter-spacing: 2px;
+      font-size: 9px;
+    }
+
+    .compare-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      vertical-align: top;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    .compare-table tr:nth-child(even) td {
+      background: var(--bg-card);
+    }
+
+    .compare-table td:first-child {
+      color: var(--text-sub);
+      white-space: nowrap;
+    }
+
+    .tag-yes {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .tag-no {
+      color: var(--text-sub);
+      opacity: 0.6;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+
+    /* Hide labels whenever viz is too short to fit them without overlap */
+    @media (max-width: 1280px) {
+      .stack-hero-viz::before, .stack-hero-viz::after { display: none; }
+      .stack-hero-viz { padding: 8px 24px 8px; }
+    }
+
+    /* Hero stack: override the 16/9 wrapper when single-column layout kicks in */
+    @media (max-width: 1024px) {
+      .hero-image-wrapper { aspect-ratio: unset !important; height: 280px; }
+      .stack-hero-viz { padding: 10px 14px 10px; }
+      .stack-layer-name { font-size: 9px; letter-spacing: 1px; }
+      .stack-layer-role { font-size: 7px; margin-top: 2px; }
+      .stack-layer-label { left: 10px; }
+      .ls-scan { left: 120px; }
+      .ls-trace-lines { left: 124px; right: 10px; }
+      .lg-nodes { left: 120px; right: 10px; overflow: hidden; }
+      .lc-pipe { left: 120px; right: 10px; overflow: hidden; }
+      .lc-step { font-size: 7px; padding: 4px 5px; letter-spacing: 0; }
+      .lc-pipe-sym { font-size: 11px; padding: 0 2px; }
+      .lg-node { width: 32px; height: 32px; font-size: 7px; }
+      .lg-edge { min-width: 10px; }
+    }
+
+    @media (max-width: 768px) {
+      .pipeline-demo { gap: 4px; }
+      .pipe-box { min-width: 60px; padding: 10px 10px; }
+      .pipe-box-type { font-size: 9px; }
+      .trace-demo { grid-template-columns: 1fr; }
+      .stack-layer { overflow: hidden; }
+      .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .compare-table { font-size: 9px; min-width: 480px; }
+      .compare-table td, .compare-table th { padding: 7px 8px; }
+    }
+  </style>
+  <script src="../assets/js/theme-init.js"></script>
+</head>
+
+<body>
+  <div class="scroll-indicator" id="scrollIndicator"></div>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="header">
+    <a href="../index.html" class="header-brand">
+      <span class="brand-logo-text">BIT<span class="brand-connector">by</span>BIT</span>
+    </a>
+    <div class="header-status">
+      <span class="header-tagline">
+        Breaking down tech <br> one bit at a time
+      </span>
+      <button id="themeToggle" title="Toggle Theme">
+        <svg id="iconSun" viewBox="0 0 24 24" style="display: block;">
+          <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
+        </svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" style="fill: none; stroke: var(--text-sub); stroke-width: 2; display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+
+    <!-- ── HERO ──────────────────────────────────────────── -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-container">
+        <div class="hero-text-side">
+          <h1 class="hero-title">LangChain, LangGraph, LangSmith: Stop Confusing Them</h1>
+          <p class="hero-subtitle">
+            Three tools, same company, completely different jobs. LangGraph is already running in production at Klarna, Uber, and J.P. Morgan. Most developers still can't explain what it does differently from LangChain.
+          </p>
+        </div>
+
+        <div class="hero-visual-side">
+          <div class="hero-image-wrapper">
+            <div class="stack-hero-viz">
+
+              <!-- LangSmith: top layer, observer -->
+              <div class="stack-layer ls">
+                <div class="stack-layer-label">
+                  <span class="stack-layer-name">LANGSMITH</span>
+                  <span class="stack-layer-role">// OBSERVE</span>
+                </div>
+                <div class="ls-scan"></div>
+                <div class="ls-trace-lines">
+                  <div class="ls-trace-line"></div>
+                  <div class="ls-trace-line"></div>
+                  <div class="ls-trace-line"></div>
+                  <div class="ls-trace-line"></div>
+                </div>
+              </div>
+
+              <!-- LangGraph: middle layer, orchestrator -->
+              <div class="stack-layer lg">
+                <div class="stack-layer-label">
+                  <span class="stack-layer-name">LANGGRAPH</span>
+                  <span class="stack-layer-role">// ORCHESTRATE</span>
+                </div>
+                <div class="lg-nodes">
+                  <div class="lg-node">START</div>
+                  <div class="lg-edge">
+                    <div class="lg-packet"></div>
+                  </div>
+                  <div class="lg-node">AGENT</div>
+                  <div class="lg-edge">
+                    <div class="lg-packet" style="animation-delay: 0.8s;"></div>
+                  </div>
+                  <div class="lg-node">TOOLS</div>
+                  <div class="lg-edge">
+                    <div class="lg-packet" style="animation-delay: 1.6s;"></div>
+                  </div>
+                  <div class="lg-node">END</div>
+                </div>
+                <div class="lg-loop">
+                  <div class="lg-loop-line"></div>
+                </div>
+              </div>
+
+              <!-- LangChain: foundation layer, pipeline -->
+              <div class="stack-layer lc">
+                <div class="stack-layer-label">
+                  <span class="stack-layer-name">LANGCHAIN</span>
+                  <span class="stack-layer-role">// BUILD</span>
+                </div>
+                <div class="lc-pipe">
+                  <div class="lc-step">PROMPT</div>
+                  <div class="lc-pipe-sym">|</div>
+                  <div class="lc-step">LLM</div>
+                  <div class="lc-pipe-sym">|</div>
+                  <div class="lc-step">PARSER</div>
+                  <div class="lc-pipe-sym">|</div>
+                  <div class="lc-step">OUTPUT</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="hero-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Date
+              </span>
+              <span class="meta-value">2026.05.03</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Time
+              </span>
+              <span class="meta-value">12 Min Read</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                Series
+              </span>
+              <span class="meta-value">Bit by Bit</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                Tags
+              </span>
+              <div class="tags-container">
+                <span class="tag">AI / ML</span>
+                <span class="tag">Agents</span>
+                <span class="tag">Dev Tools</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CONTENT LAYOUT ────────────────────────────────── -->
+    <div class="content-layout">
+      <aside class="meta-sidebar" id="metaSidebar">
+        <div class="sidebar-mini-header">
+          <div class="mini-badge">// NOW_READING</div>
+          <div class="mini-title">LangChain Ecosystem</div>
+        </div>
+
+        <nav class="toc-container">
+          <span class="toc-label">Contents</span>
+          <ul class="toc-list" id="tocList">
+            <li><a href="#intro" class="toc-link">Introduction</a></li>
+            <li><a href="#langchain" class="toc-link">LangChain: The Builder</a></li>
+            <li><a href="#langgraph" class="toc-link">LangGraph: The Director</a></li>
+            <li><a href="#langsmith" class="toc-link">LangSmith: The Observer</a></li>
+            <li><a href="#together" class="toc-link">How They Fit Together</a></li>
+            <li><a href="#decision" class="toc-link">Decision Guide</a></li>
+            <li><a href="#resources" class="toc-link">Official Resources</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-column">
+        <div class="article-content">
+
+          <!-- ── INTRO ──────────────────────────────────── -->
+          <p id="intro">
+            If you've googled "LangChain vs LangGraph" you already know the confusion. The naming doesn't help: same prefix, same company, similar documentation sites. Most tutorials pick one and ignore the others, so you end up with a half-baked mental model and code that works until it doesn't.
+          </p>
+
+          <p>
+            Here's the frame that makes everything click: <strong>LangChain builds the pipeline, LangGraph orchestrates the agents, LangSmith watches everything.</strong> They are not alternatives. They are layers, and most serious LLM applications end up using all three.
+          </p>
+
+          <p>
+            This post explains what each one actually does, where each one breaks down, and how to decide which layer you need for any given problem.
+          </p>
+
+          <div class="divider"></div>
+
+          <!-- ── LANGCHAIN ──────────────────────────────── -->
+          <h2 id="langchain">LangChain: The Builder</h2>
+
+          <p>
+            The problem LangChain was built to solve is vendor lock-in. Before it, switching from OpenAI to Anthropic meant rewriting your API calls, your response parsing, your error handling. LangChain wraps all of that in a standard interface: one <code>.invoke()</code> call works identically across every major model provider.
+          </p>
+
+          <p>
+            The core abstraction is <strong>LCEL</strong>, the LangChain Expression Language. It uses the pipe operator <code>|</code> to connect components the way Unix connects commands. A prompt template, a model, and an output parser chain together like this:
+          </p>
+
+          <div class="code-block">
+            <span class="code-label">// Python — LCEL chain</span>
+            <code><span class="code-keyword">chain</span> = prompt | llm | output_parser
+result = chain.invoke({"question": "What is LangGraph?"})</code>
+          </div>
+
+          <p>
+            Any component that implements the <code>Runnable</code> interface can sit in that pipe. Swap the model, change the parser, add a retriever in the middle: the rest of the chain stays the same. Beyond the pipe, LangChain ships ready-made components for the most common tasks: document loaders, text splitters, vector store retrievers, conversation memory, structured output parsers.
+          </p>
+
+          <div class="demo-viz" data-label="// ANIM_01 · LCEL_PIPELINE">
+            <div class="pipeline-demo">
+              <div class="pipe-box">
+                <span class="pipe-box-name">INPUT</span>
+                <span class="pipe-box-type">User Query</span>
+              </div>
+              <span class="pipe-arrow">→</span>
+              <div class="pipe-box">
+                <span class="pipe-box-name">COMPONENT</span>
+                <span class="pipe-box-type">Prompt</span>
+              </div>
+              <span class="pipe-op">|</span>
+              <div class="pipe-box">
+                <span class="pipe-box-name">COMPONENT</span>
+                <span class="pipe-box-type">LLM</span>
+              </div>
+              <span class="pipe-op">|</span>
+              <div class="pipe-box">
+                <span class="pipe-box-name">COMPONENT</span>
+                <span class="pipe-box-type">Parser</span>
+              </div>
+              <span class="pipe-arrow">→</span>
+              <div class="pipe-box">
+                <span class="pipe-box-name">OUTPUT</span>
+                <span class="pipe-box-type">Answer</span>
+              </div>
+            </div>
+            <div class="lcel-code">prompt | llm | parser &nbsp;·&nbsp; .invoke() &nbsp;·&nbsp; .stream() &nbsp;·&nbsp; .batch()</div>
+            <div class="demo-caption">Each component lights up as the input passes through. No state. No branches. One direction. That is LCEL.</div>
+          </div>
+
+          <p>
+            The limit of LangChain is exactly that linearity. There is no shared state between invocations, no way to loop back, no branching logic. The input enters, passes through each component in sequence, and exits. For a chatbot, a RAG pipeline, or a document summarizer, that is all you need.
+          </p>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              What LCEL gives you for free
+            </div>
+            <p style="margin-bottom: 0;">Swap <code>.invoke()</code> for <code>.stream()</code> and the chain yields tokens as they arrive. Swap for <code>.batch()</code> and it processes a list of inputs in parallel. The pipe handles all of this with no extra code on your end.</p>
+          </div>
+
+          <!-- ── LANGGRAPH ──────────────────────────────── -->
+          <h2 id="langgraph">LangGraph: The Director</h2>
+
+          <p>
+            Real agents don't run in a straight line. A coding agent reads a file, runs a test, sees an error, decides whether to retry or ask the human, retries up to three times, then gives up if it still fails. That control flow has loops, conditionals, and recoverable failures. You cannot express it as an LCEL chain.
+          </p>
+
+          <p>
+            LangGraph models agent behavior as a <strong>directed graph</strong>. Nodes are Python functions that receive the current state and return an update to it. Edges connect nodes. Conditional edges can route to different nodes based on what the state contains. The state itself is a typed dictionary: think of it as a shared backpack that every node reads from and writes to as the execution moves through the graph.
+          </p>
+
+          <div class="demo-viz" data-label="// ANIM_02 · STATE_GRAPH">
+            <div class="graph-demo">
+              <div class="graph-canvas">
+                <svg class="graph-svg" viewBox="0 0 700 240" preserveAspectRatio="none">
+                  <!-- START to AGENT -->
+                  <line x1="90" y1="120" x2="260" y2="46" stroke="var(--border)" stroke-width="1"/>
+                  <polygon points="255,42 270,52 260,58" fill="var(--border)"/>
+                  <!-- AGENT to TOOLS -->
+                  <line x1="350" y1="72" x2="350" y2="162" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4,3"/>
+                  <polygon points="345,158 350,172 355,158" fill="var(--accent)"/>
+                  <!-- TOOLS to AGENT (loop back, left side) -->
+                  <path d="M300,186 Q220,186 220,46 Q220,28 265,28" stroke="var(--accent)" stroke-width="1" fill="none" stroke-dasharray="4,3"/>
+                  <polygon points="260,23 270,28 260,33" fill="var(--accent)"/>
+                  <!-- AGENT to END -->
+                  <line x1="440" y1="46" x2="608" y2="120" stroke="var(--border)" stroke-width="1"/>
+                  <polygon points="604,116 614,122 606,130" fill="var(--border)"/>
+                </svg>
+
+                <div class="graph-node start">
+                  <span class="graph-node-label">NODE</span>
+                  <span class="graph-node-name">START</span>
+                </div>
+                <div class="graph-node agent">
+                  <span class="graph-node-label">NODE</span>
+                  <span class="graph-node-name">AGENT</span>
+                </div>
+                <div class="graph-node tools">
+                  <span class="graph-node-label">NODE</span>
+                  <span class="graph-node-name">TOOLS</span>
+                </div>
+                <div class="graph-node end">
+                  <span class="graph-node-label">NODE</span>
+                  <span class="graph-node-name">END</span>
+                </div>
+
+                <div class="state-badge">{ state }</div>
+
+                <div class="human-pause">⏸ WAITING FOR HUMAN INPUT</div>
+
+                <div class="cond-label" style="top: 88px; left: 46%; color: var(--accent); font-size: 8px;">needs tool?</div>
+                <div class="cond-label" style="top: 88px; right: 10%; color: var(--text-sub); font-size: 8px;">done?</div>
+              </div>
+            </div>
+            <div class="demo-caption">State moves through the graph. AGENT calls the LLM; conditional edge checks if a tool is needed. If yes: route to TOOLS, update state, loop back. If no: route to END. The graph pauses when human input is required.</div>
+          </div>
+
+          <p>
+            The result is a first-class loop. The agent node calls the model; a conditional edge checks whether the model requested a tool call; the tools node runs the tool and writes the result back into state; the edge routes back to the agent. That cycle repeats until the model decides it has enough information and routes to END instead.
+          </p>
+
+          <p>
+            Three features separate LangGraph from a plain LCEL chain: <strong>checkpointing</strong> (state persists to a database, so long-running agents survive restarts), <strong>human-in-the-loop</strong> (the graph can pause at any node and wait for a human decision before continuing), and <strong>streaming</strong> (you can observe every node's input and output as it happens). These are the things production agents actually need.
+          </p>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              LangGraph is intentionally low-level
+            </div>
+            <p style="margin-bottom: 0;">It does not abstract prompts, tools, or memory on your behalf. You wire every node explicitly. That verbosity is the point: complex agent behavior needs visible control flow, not implicit magic. Klarna, Uber, and J.P. Morgan run LangGraph in production exactly because they can see every decision branch.</p>
+          </div>
+
+          <!-- ── LANGSMITH ──────────────────────────────── -->
+          <h2 id="langsmith">LangSmith: The Observer</h2>
+
+          <p>
+            Once your chain or graph is running, you have a new problem: you cannot see inside it. A chain calls a model, the model returns something wrong, and you have no idea which prompt produced the bad output, how long each step took, or how many tokens were consumed. Log files give you strings. You need a trace.
+          </p>
+
+          <p>
+            LangSmith is an observability platform that instruments your application. It captures every LLM call, tool invocation, and chain step as a <strong>span</strong>, then assembles those spans into a trace tree. You see the full execution path, the input and output of every node, the token counts, and the latency, all in one hierarchical view.
+          </p>
+
+          <div class="demo-viz" data-label="// ANIM_03 · LANGSMITH_TRACE">
+            <div class="trace-demo">
+              <div class="trace-app">
+                <div class="trace-req">→ USER: "summarize this doc"</div>
+                <div class="trace-req">→ RETRIEVER: fetching chunks</div>
+                <div class="trace-req">→ LLM: claude-sonnet-4-6</div>
+                <div class="trace-req">→ PARSER: structured output</div>
+              </div>
+
+              <div class="trace-tree">
+                <div class="trace-span">
+                  <span class="span-name">▾ rag_chain</span>
+                  <span class="span-time">890ms</span>
+                </div>
+                <div class="trace-span">
+                  <span class="span-name">▾ retriever</span>
+                  <span class="span-time">42ms</span>
+                </div>
+                <div class="trace-span">
+                  <span class="span-name">▾ llm</span>
+                  <span class="span-time">820ms</span>
+                </div>
+                <div class="trace-span">
+                  <span class="span-name">· tokens_in</span>
+                  <span class="span-time">1,240</span>
+                </div>
+                <div class="trace-span">
+                  <span class="span-name">· tokens_out</span>
+                  <span class="span-time">312</span>
+                </div>
+              </div>
+            </div>
+            <div class="demo-caption">Every call in your application becomes a span. LangSmith assembles them into a trace tree showing latency, token counts, and the exact input/output of each node. The retriever took 42ms. The LLM took 820ms. Now you know where to optimize.</div>
+          </div>
+
+          <p>
+            LangSmith does not execute your code. It watches it. Your application sends telemetry to LangSmith in the background; adding <code>LANGSMITH_TRACING=true</code> to your environment is enough to start capturing traces if you are using LangChain or LangGraph. For other frameworks, a thin SDK wrapper does the same job.
+          </p>
+
+          <p>
+            Beyond tracing, LangSmith handles evaluation at scale. Define a dataset of (input, expected output) pairs, run your chain against all of them, score each output with a custom function or an LLM judge, and track the score over time. Every prompt change gets measured against that baseline before it touches users.
+          </p>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              LangSmith is framework-agnostic
+            </div>
+            <p style="margin-bottom: 0;">You do not need LangChain or LangGraph to use LangSmith. It works with raw Anthropic or OpenAI SDK calls, or any other framework. The tracing SDK is the only dependency. Add it to whatever you are already building.</p>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- ── HOW THEY FIT TOGETHER ──────────────────── -->
+          <h2 id="together">How They Fit Together</h2>
+
+          <p>
+            The three tools solve three different problems at three different stages of building. The path from prototype to production almost always follows the same order.
+          </p>
+
+          <p>
+            Start with <strong>LangChain</strong> for the first version. You get a vendor-agnostic model interface, a collection of ready-made components for the most common tasks, and LCEL to wire them into a chain. Most chatbots, RAG pipelines, and Q&A systems never need anything more.
+          </p>
+
+          <p>
+            Add <strong>LangGraph</strong> when the workflow requires state, loops, or branching. LangGraph builds on LangChain components: you can reuse the same models, tools, and retrievers inside a StateGraph node. The upgrade is additive. You are not rewriting the application; you are wrapping the complex parts in a graph.
+          </p>
+
+          <p>
+            Add <strong>LangSmith</strong> before shipping to production. Instrument the application, run your evaluation dataset, establish a quality baseline. Every future change to a prompt or model gets scored against that baseline before it touches users. Without this step, you are guessing whether changes helped or hurt.
+          </p>
+
+          <div class="table-scroll">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Aspect</th>
+                <th>LangChain</th>
+                <th>LangGraph</th>
+                <th>LangSmith</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>What it is</td>
+                <td>Component framework</td>
+                <td>Orchestration engine</td>
+                <td>Observability platform</td>
+              </tr>
+              <tr>
+                <td>Core abstraction</td>
+                <td>LCEL pipe chain</td>
+                <td>StateGraph + nodes</td>
+                <td>Spans + trace trees</td>
+              </tr>
+              <tr>
+                <td>Execution model</td>
+                <td>Sequential pipeline</td>
+                <td>Graph with loops</td>
+                <td>Does not execute code</td>
+              </tr>
+              <tr>
+                <td>Handles loops</td>
+                <td class="tag-no">No</td>
+                <td class="tag-yes">Yes</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>Human-in-the-loop</td>
+                <td class="tag-no">No</td>
+                <td class="tag-yes">Yes</td>
+                <td>N/A</td>
+              </tr>
+              <tr>
+                <td>Framework-agnostic</td>
+                <td class="tag-no">No</td>
+                <td class="tag-no">No</td>
+                <td class="tag-yes">Yes</td>
+              </tr>
+              <tr>
+                <td>When to add</td>
+                <td>Day one</td>
+                <td>When workflow needs state</td>
+                <td>Before production</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+
+          <!-- ── DECISION GUIDE ─────────────────────────── -->
+          <h2 id="decision">Decision Guide</h2>
+
+          <p>
+            Use this as a starting point, not a rigid rule. Real applications often need multiple patterns at once.
+          </p>
+
+          <p><strong>Use LangChain if:</strong></p>
+          <ul class="check-list">
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>Your workflow is linear:</strong> user sends input, model processes it, you return output. No state needed between calls.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You want provider flexibility:</strong> swap OpenAI for Anthropic or Gemini without touching the rest of your code.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You are building a chatbot or RAG pipeline:</strong> standard components (retrievers, splitters, parsers) cover 90% of the work.
+            </li>
+          </ul>
+
+          <p><strong>Upgrade to LangGraph if:</strong></p>
+          <ul class="check-list">
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You need loops or retries:</strong> the agent should be able to call a tool, see the result, and decide whether to call another one.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You are building a multi-agent system:</strong> a coordinator agent that routes tasks to specialist agents requires graph-based orchestration.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You need the workflow to pause:</strong> a code review agent that waits for human approval before deploying requires human-in-the-loop.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You need durable state:</strong> the agent runs for hours and must survive restarts without losing its place in the workflow.
+            </li>
+          </ul>
+
+          <p><strong>Add LangSmith if:</strong></p>
+          <ul class="check-list">
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You are approaching production:</strong> every LLM application that touches real users needs visibility into what the model is actually doing.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You need to debug bad outputs:</strong> a trace tree shows you the exact prompt, context, and model call that produced any given response.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>You want to test prompt changes safely:</strong> run a new prompt against a dataset of real examples and score the diff before deploying.
+            </li>
+          </ul>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              The one mistake most teams make
+            </div>
+            <p style="margin-bottom: 0;">They add LangGraph on day one because agents sound more powerful. Then they spend three weeks debugging control flow that a plain LCEL chain would have handled in an afternoon. Start simple. Move to LangGraph when the linear model breaks, not before.</p>
+          </div>
+
+          <!-- ── OFFICIAL RESOURCES ─────────────────────── -->
+          <h2 id="resources">Official Resources</h2>
+
+          <div class="resources-grid">
+
+            <a href="https://python.langchain.com/docs/introduction/" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">LangChain</div>
+              <div class="resource-header">LangChain Python Docs</div>
+              <div class="resource-desc">Official introduction to LCEL, components, and the full component catalog. The right place to start building your first chain.</div>
+            </a>
+
+            <a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">LangGraph</div>
+              <div class="resource-header">LangGraph Documentation</div>
+              <div class="resource-desc">StateGraph API reference, tutorials on human-in-the-loop, checkpointing, and multi-agent orchestration patterns.</div>
+            </a>
+
+            <a href="https://docs.smith.langchain.com/" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">LangSmith</div>
+              <div class="resource-header">LangSmith Documentation</div>
+              <div class="resource-desc">Tracing setup, evaluation datasets, prompt versioning, and the LangSmith SDK for non-LangChain applications.</div>
+            </a>
+
+            <a href="https://youtu.be/e-GR3PlEOVU" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">YouTube</div>
+              <div class="resource-header">Stop Confusing LangChain, LangGraph, and LangSmith</div>
+              <div class="resource-desc">Video walkthrough covering the full ecosystem breakdown with live demos and practical examples.</div>
+            </a>
+
+          </div>
+
+          <!-- ── RECOMMENDATIONS ────────────────────────── -->
+          <section class="recommendations-section">
+            <div class="recommendations-header">
+              <h2>→ Continue Reading</h2>
+            </div>
+
+            <div class="recommendations-grid">
+              <a href="turboquant-blog.html" class="rec-card">
+                <div class="rec-badge">Related</div>
+                <h3>TurboQuant: How Google Compressed LLM Memory 6x</h3>
+                <p class="rec-excerpt">
+                  The other end of the stack: once you have an agent running, here's how Google cut the memory cost of serving it by 6x with no accuracy loss.
+                </p>
+                <div class="rec-footer">
+                  <div class="rec-meta">
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                      2026.04.18
+                    </span>
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      10 Min Read
+                    </span>
+                  </div>
+                  <div class="rec-btn">Read →</div>
+                </div>
+              </a>
+
+              <a href="../index.html" class="rec-card">
+                <div class="rec-badge">Home</div>
+                <h3>Explore More Topics</h3>
+                <p class="rec-excerpt">
+                  More posts in the Bit by Bit series, each one picking apart a piece of modern AI infrastructure.
+                </p>
+                <div class="rec-footer">
+                  <div class="rec-meta">
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                      Homepage
+                    </span>
+                  </div>
+                  <div class="rec-btn">Browse All →</div>
+                </div>
+              </a>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ────────────────────────────────────────── -->
+  <footer class="simple-footer">
+    <div class="footer-content">
+      <a href="https://thejus-m.is-a.dev" class="footer-home-mark" title="Return Home">T</a>
+      <div class="footer-info">
+        <span>Bit by Bit Series • 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── MOBILE TOC ─────────────────────────────────────── -->
+  <button id="mobileTocBtn" class="mobile-toc-fab" aria-label="Open Table of Contents" onclick="document.getElementById('mobileTocOverlay').classList.add('active')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <div id="mobileTocOverlay" class="mobile-toc-overlay">
+    <div class="mobile-toc-backdrop" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')"></div>
+    <div class="mobile-toc-sheet" id="mobileTocSheet">
+      <div class="mobile-toc-handle-bar">
+        <div class="mobile-toc-handle"></div>
+      </div>
+      <div class="mobile-toc-header">
+        <div class="mobile-toc-header-text">
+          <span class="mobile-toc-tag">// BIT_BY_BIT_LOG</span>
+          <span class="mobile-toc-title-main">LangChain Ecosystem</span>
+        </div>
+        <button id="mobileTocClose" class="mobile-toc-close" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="mobile-toc-content" id="mobileTocContent"></div>
+    </div>
+  </div>
+
+  <script src="../assets/js/blog-common.js"></script>
+  <script src="../assets/js/resource-cache-data.js"></script>
+  <script src="../assets/js/resource-preview.js"></script>
+</body>
+</html>

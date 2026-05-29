@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.ThemeManager.toggle();
                 updateThemeIcons();
             }
+            if (window.InteractionManager) {
+                window.InteractionManager.vibe([30, 60, 30]);
+                window.InteractionManager.microBounce(themeBtn);
+            }
+            themeBtn.classList.add('bb-icon-pop');
+            setTimeout(() => themeBtn.classList.remove('bb-icon-pop'), 300);
         };
     }
 
@@ -44,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const scrollTop = window.scrollY;
             const scrollPercent = (scrollTop / (documentHeight - windowHeight)) * 100;
             scrollIndicator.style.width = scrollPercent + '%';
+            if (window.InteractionManager) window.InteractionManager.checkMilestone(scrollPercent);
         });
     }
 
@@ -74,7 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // TOC SCROLL SPY
     // ===========================
     const sections = document.querySelectorAll('.article-content h2[id], #intro');
-    
+
+    document.querySelectorAll('#tocList .toc-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.InteractionManager) window.InteractionManager.vibe([15]);
+        });
+    });
+
     if (sections.length > 0) {
         window.addEventListener('scroll', () => {
             let current = '';
@@ -98,19 +111,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // FAB AUTO-HIDE
     // ===========================
     let scrollTimeout;
-    
+
     window.addEventListener('scroll', () => {
        const fabToCheck = document.getElementById('mobileTocBtn');
        if (!fabToCheck) return;
-       
-       // Hide immediately on scroll
+
        fabToCheck.classList.add('hidden');
-       
+
        clearTimeout(scrollTimeout);
        scrollTimeout = setTimeout(() => {
            fabToCheck.classList.remove('hidden');
+           fabToCheck.classList.add('bb-fab-bounce');
+           setTimeout(() => fabToCheck.classList.remove('bb-fab-bounce'), 400);
        }, 300);
-       
+
     }, { passive: true });
 
     // ===========================
@@ -120,26 +134,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileTocSheet = document.getElementById('mobileTocSheet');
     const mobileTocContent = document.getElementById('mobileTocContent');
     const desktopTocList = document.getElementById('tocList');
-    
+
     function closeMobileToc() {
         if (!mobileTocOverlay || !mobileTocSheet) return;
+        if (window.InteractionManager) window.InteractionManager.vibe([25]);
         mobileTocOverlay.classList.remove('active');
         document.body.classList.remove('no-scroll');
         mobileTocSheet.style.transform = '';
         mobileTocSheet.classList.remove('expanded');
-        mobileTocSheet.style.height = ''; 
-        
+        mobileTocSheet.style.height = '';
+
         const fab = document.getElementById('mobileTocBtn');
         if (fab) fab.classList.remove('hidden-by-sheet');
     }
 
     function openMobileToc() {
         if (!mobileTocOverlay || !mobileTocSheet) return;
+        if (window.InteractionManager) window.InteractionManager.vibe([40]);
         mobileTocOverlay.classList.add('active');
         document.body.classList.add('no-scroll');
         mobileTocSheet.classList.remove('expanded');
         mobileTocSheet.style.height = '';
-        
+
         const fab = document.getElementById('mobileTocBtn');
         if (fab) fab.classList.add('hidden-by-sheet');
     }
@@ -149,51 +165,52 @@ document.addEventListener('DOMContentLoaded', () => {
       const clonedList = desktopTocList.cloneNode(true);
       clonedList.removeAttribute('id');
       mobileTocContent.appendChild(clonedList);
-      
+
       mobileTocContent.querySelectorAll('.toc-link').forEach(link => {
-        link.addEventListener('click', closeMobileToc);
+        link.addEventListener('click', () => {
+            if (window.InteractionManager) window.InteractionManager.vibe([15]);
+            closeMobileToc();
+        });
       });
     }
-    
+
     let startY = 0;
     let isDragging = false;
     let startHeight = 0;
     let isExpanded = false;
-    
+
     const touchArea = mobileTocSheet;
-    
+
     if (touchArea) {
         touchArea.addEventListener('touchstart', (e) => {
             startY = e.touches[0].clientY;
             isExpanded = mobileTocSheet.classList.contains('expanded');
             startHeight = mobileTocSheet.offsetHeight;
-            
+
             isDragging = false;
             mobileTocSheet.style.transition = 'none';
         }, { passive: false });
-        
+
         touchArea.addEventListener('touchmove', (e) => {
             const currentY = e.touches[0].clientY;
             const deltaY = currentY - startY;
             const isContent = e.target.closest('.mobile-toc-content');
             const content = mobileTocContent;
-            
+
             let shouldDrag = false;
 
             if (!isContent) {
                 shouldDrag = true;
             } else {
                 if (!isExpanded) {
-                    // 50% State
-                    if (deltaY < 0) { // Swipe Up (Expand)
+                    if (deltaY < 0) {
                         const isAtBottom = (content.scrollTop + content.clientHeight >= content.scrollHeight - 5);
                         if (isAtBottom) shouldDrag = true;
-                    } else { // Swipe Down (Close)
+                    } else {
                         if (content.scrollTop <= 0) shouldDrag = true;
                     }
                 } else {
-                    // 100% State
-                    if (deltaY > 0) { // Swipe Down (Collapse)
+                    if (deltaY > 0) {
                         if (content.scrollTop <= 0) shouldDrag = true;
                     }
                 }
@@ -202,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (shouldDrag) {
                 e.preventDefault();
                 isDragging = true;
-                
+
                 if (!isExpanded) {
                     if (deltaY < 0) {
                          const newHeight = startHeight + Math.abs(deltaY);
@@ -219,16 +236,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }, { passive: false });
-        
+
         touchArea.addEventListener('touchend', (e) => {
             mobileTocSheet.style.transition = '';
-            
+
             if (!isDragging) return;
             isDragging = false;
-            
+
             const currentY = e.changedTouches[0].clientY;
             const deltaY = currentY - startY;
-            
+
             if (!isExpanded) {
                 if (deltaY < -50) {
                     mobileTocSheet.style.height = '';
@@ -250,11 +267,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Open Button Logic
     const openBtn = document.getElementById('mobileTocBtn');
     if (openBtn) {
         openBtn.addEventListener('click', () => {
+             if (window.InteractionManager) window.InteractionManager.microBounce(openBtn);
              openMobileToc();
              setTimeout(() => {
                  const activeLink = mobileTocContent.querySelector('.toc-link.active');
@@ -264,11 +282,14 @@ document.addEventListener('DOMContentLoaded', () => {
              }, 100);
         });
     }
-    
+
     // Close Button Logic
     const closeBtn = document.querySelector('.mobile-toc-close');
     if (closeBtn) {
-        closeBtn.addEventListener('click', closeMobileToc);
+        closeBtn.addEventListener('click', () => {
+            if (window.InteractionManager) window.InteractionManager.microBounce(closeBtn);
+            closeMobileToc();
+        });
     }
 
     // Backdrop Logic

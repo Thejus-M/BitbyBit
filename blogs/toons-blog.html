@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Understanding TOONs — Bit by Bit</title>
+  <meta name="description" content="TOON (Token-Oriented Object Notation) is a leaner data format built for LLM communication, cutting token usage by up to 50% versus JSON for repetitive, structured data.">
+  <link rel="icon" type="image/svg+xml" href="../assets/images/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -12,8 +14,9 @@
     rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/blog-common.css">
   <style>
-    /* Custom Visualization for TOONs Blog */
+    /* Custom Visualization for TOONs Blog (decorative) */
     .hero-placeholder-art {
+      /* purely decorative background pattern, marked aria-hidden in markup */
       width: 100%;
       height: 100%;
       background-image: 
@@ -69,11 +72,11 @@
       <span class="header-tagline">
         Breaking down tech <br> one bit at a time
       </span>
-      <button id="themeToggle" title="Toggle Theme">
-        <svg id="iconSun" viewBox="0 0 24 24" style="display: block;">
+      <button id="themeToggle" title="Toggle theme" aria-label="Toggle color theme">
+        <svg id="iconSun" viewBox="0 0 24 24" style="display: block;" aria-hidden="true" focusable="false">
           <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
         </svg>
-        <svg id="iconMoon" viewBox="0 0 24 24" style="fill: none; stroke: var(--text-sub); stroke-width: 2; display: none;">
+        <svg id="iconMoon" viewBox="0 0 24 24" style="fill: none; stroke: var(--text-sub); stroke-width: 2; display: none;" aria-hidden="true" focusable="false">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
       </button>
@@ -96,35 +99,35 @@
         <!-- VISUAL + DATA SIDE -->
         <div class="hero-visual-side">
             <div class="hero-image-wrapper">
-                <div class="hero-placeholder-art"></div>
+                <div class="hero-placeholder-art" role="img" aria-label="Decorative retro terminal-style illustration"></div>
             </div>
           
             <!-- Metdata moved here to balance list -->
             <div class="hero-meta-grid">
                 <div class="meta-item">
                   <span class="meta-label">
-                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     Date
                   </span>
                   <span class="meta-value">2026.01.17</span>
                 </div>
                 <div class="meta-item">
                   <span class="meta-label">
-                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     Time
                   </span>
                   <span class="meta-value">12 Min Read</span>
                 </div>
                 <div class="meta-item">
                   <span class="meta-label">
-                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                     Series
                   </span>
                   <span class="meta-value">Bit by Bit</span>
                 </div>
                 <div class="meta-item">
                   <span class="meta-label">
-                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                    <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                     Tags
                   </span>
                   <div class="tags-container">
@@ -148,7 +151,7 @@
           <div class="mini-title">Understanding TOONs</div>
         </div>
 
-        <nav class="toc-container">
+        <nav class="toc-container" aria-label="Table of contents">
           <span class="toc-label">Contents</span>
           <ul class="toc-list" id="tocList">
             <li><a href="#intro" class="toc-link">Introduction</a></li>
@@ -188,7 +191,7 @@
 
           <div class="callout">
             <div class="callout-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -266,43 +269,41 @@
               <div class="rec-footer">
                 <div class="rec-meta">
                   <span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     2025.01.20
                   </span>
                   <span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     4 Min Read
                   </span>
                 </div>
                 <div class="rec-btn">
-                  Read <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  Read <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </div>
               </div>
             </a>
-            
-            <a href="#" class="rec-card">
+
+            <div class="rec-card rec-card-disabled" aria-disabled="true">
               <span class="rec-badge">Concept</span>
               <h3>LLM Token Economics</h3>
               <p class="rec-excerpt">
                 Understanding how token pricing works and why data format efficiency matters for AI applications.
               </p>
-              
+
               <div class="rec-footer">
                 <div class="rec-meta">
                   <span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     2025.02.01
                   </span>
                   <span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     8 Min Read
                   </span>
                 </div>
-                <div class="rec-btn">
-                  Read <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </div>
+                <div class="rec-btn">Coming soon</div>
               </div>
-            </a>
+            </div>
           </div>
         </section>
       </main>
@@ -312,7 +313,7 @@
   <!-- Footer -->
   <footer class="simple-footer">
     <div class="footer-content">
-      <a href="../index.html" class="footer-home-mark" title="Return Home">T</a>
+      <a href="../index.html" class="footer-home-mark" title="Return home" aria-label="Return home">T</a>
       <div class="footer-info">
         <span>Bit by Bit Series • 2026</span>
       </div>
@@ -320,8 +321,8 @@
   </footer>
 
   <!-- MOBILE TOC ELEMENTS -->
-  <button id="mobileTocBtn" class="mobile-toc-fab" aria-label="Open Table of Contents" onclick="document.getElementById('mobileTocOverlay').classList.add('active')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <button id="mobileTocBtn" class="mobile-toc-fab" aria-label="Open table of contents" onclick="document.getElementById('mobileTocOverlay').classList.add('active')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
       <line x1="3" y1="12" x2="21" y2="12"></line>
       <line x1="3" y1="6" x2="21" y2="6"></line>
       <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -346,8 +347,8 @@
           <span class="mobile-toc-title-main">Understanding TOONs</span>
         </div>
         
-        <button id="mobileTocClose" class="mobile-toc-close" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="mobileTocClose" class="mobile-toc-close" aria-label="Close table of contents" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>

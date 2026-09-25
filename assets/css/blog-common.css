@@ -42,7 +42,7 @@
   --bg-card-elevated: #0f0f0f;
   
   --text-main: #6BA4D9;
-  --text-sub: #4A7091;
+  --text-sub: #5D82A8; /* lightened from #4A7091 for WCAG AA contrast on #000 body */
   --text-code: #6BA4D9;
   
   --border: #4A7091;
@@ -54,6 +54,34 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Visible keyboard focus state (a11y) - all interactive elements */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 body {
@@ -102,6 +130,7 @@ body::before {
   text-decoration: none;
   display: flex;
   align-items: center;
+  min-height: 44px;
 }
 
 .brand-logo-text {
@@ -155,13 +184,14 @@ body::before {
 #themeToggle {
   background: none;
   border: 1px solid var(--border);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s;
+  flex-shrink: 0;
 }
 
 #themeToggle:hover {
@@ -578,6 +608,64 @@ body::before {
   margin: 80px 0;
 }
 
+/* =========================================
+   INLINE & BLOCK CODE
+   ========================================= */
+.article-content code {
+  font-family: var(--font-mono-code);
+  font-size: 0.9em;
+  background: var(--bg-card-elevated);
+  border: 1px solid var(--border-sub);
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: var(--text-code);
+  word-break: break-word;
+}
+
+.code-block {
+  margin: 32px 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.code-label {
+  display: block;
+  font-family: var(--font-mono-sys);
+  font-size: 10px;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border-sub);
+  background: var(--bg-card-elevated);
+}
+
+.article-content .code-block code {
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  padding: 20px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  white-space: pre;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  tab-size: 2;
+}
+
+.code-keyword {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .article-content .code-block code { font-size: 0.75rem; padding: 16px; }
+  .code-label { font-size: 9px; padding: 8px 16px; }
+}
+
 .comparison-table {
   width: 100%;
   border-collapse: collapse;
@@ -735,6 +823,7 @@ body::before {
 .rec-btn {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: 8px;
   padding: 12px 24px;
   border: 1px solid var(--border);
@@ -752,6 +841,29 @@ body::before {
   background: var(--accent);
   color: var(--bg-card);
   cursor: pointer;
+}
+
+/* Disabled / "coming soon" recommendation card - not yet a real link */
+.rec-card-disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.rec-card-disabled:hover {
+  border-color: var(--border);
+  transform: none;
+  box-shadow: 4px 4px 0 var(--border-sub);
+  cursor: default;
+}
+
+.rec-card-disabled .rec-btn {
+  cursor: default;
+}
+
+.rec-card-disabled .rec-btn:hover {
+  border-color: var(--border);
+  background: none;
+  color: var(--text-main);
 }
 
 .simple-footer {
@@ -779,7 +891,11 @@ body::before {
   text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   text-transform: uppercase;
   letter-spacing: 0;
 }
@@ -963,8 +1079,8 @@ body.no-scroll {
 .mobile-toc-close {
   background: var(--bg-card-elevated);
   border: 1px solid var(--border);
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1057,6 +1173,8 @@ body.no-scroll {
 @media (max-width: 768px) {
   .header { padding: 0 20px; }
 
+  #themeToggle { width: 44px; height: 44px; }
+
   .hero-section { padding: 60px 20px 40px; }
   .hero-title { font-size: 2.5rem; }
   .hero-subtitle { font-size: 1.25rem; }
@@ -1109,6 +1227,14 @@ body.no-scroll {
   .meta-value { font-size: 11px; }
 
   .simple-footer { padding: 60px 20px; }
+
+  /* Disable hand-pinned tilt on narrow screens to avoid edge clipping */
+  .resource-card:nth-child(1),
+  .resource-card:nth-child(2),
+  .resource-card:nth-child(3),
+  .resource-card:nth-child(4) {
+    transform: none;
+  }
 }
 
 /* Theme Image Loading/Error State */
@@ -1231,24 +1357,23 @@ body.no-scroll {
   color: var(--text-main);
   
   /* Pin Pivot Point */
-  transform-origin: center 0px; 
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy spring effect */
-  
-  /* Realistic resting shadow */
-  box-shadow: 2px 5px 10px rgba(0,0,0,0.06);
+  transform-origin: center 0px;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Hard resting shadow, matches .rec-card brutalist shadow language */
+  box-shadow: 4px 4px 0 var(--border-sub);
 }
 
-/* Random "Hand-Pinned" Angles */
-.resource-card:nth-child(1) { transform: rotate(-2.5deg) translateY(5px); }
-.resource-card:nth-child(2) { transform: rotate(1.8deg) translateY(-5px); }
-.resource-card:nth-child(3) { transform: rotate(-1.2deg) translateY(8px); }
-.resource-card:nth-child(4) { transform: rotate(3deg) translateY(0px); }
+/* Subtle "Hand-Pinned" angles, toned down to stay close to the site's flat/sharp language */
+.resource-card:nth-child(1) { transform: rotate(-0.8deg); }
+.resource-card:nth-child(2) { transform: rotate(0.6deg); }
+.resource-card:nth-child(3) { transform: rotate(-0.5deg); }
+.resource-card:nth-child(4) { transform: rotate(0.9deg); }
 
-/* HOVER: Lift the bottom edge like a real note */
+/* HOVER: reset rotation, lift like .rec-card */
 .resource-card:hover {
-  /* Reset rotation, lift up (Z), and tilt bottom edge up (rotateX) */
-  transform: rotate(0deg) translateZ(20px) rotateX(-5deg) translateY(-5px) !important;
-  box-shadow: 0 25px 40px -10px rgba(0,0,0,0.15); /* Distant shadow */
+  transform: rotate(0deg) translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0 var(--accent);
   z-index: 50;
   border-color: var(--accent);
   background: var(--bg-card);

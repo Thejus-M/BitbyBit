@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurboQuant: How Google Compressed LLM Memory 6x — Bit by Bit</title>
+  <meta name="description" content="Google shrunk the KV cache of a 104B parameter model from 448 GB to 74 GB without any retraining. A visual breakdown of how PolarQuant and QJL pull it off.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Share+Tech+Mono&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/blog-common.css">
+  <style>
+    /* ============================================================
+       HERO: VRAM COMPRESSION BAR
+       ============================================================ */
+    .vram-hero-viz {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 30px 24px;
+      background:
+        linear-gradient(180deg, var(--bg-card) 0%, var(--bg-body) 100%);
+      overflow: hidden;
+    }
+
+    .vram-hero-viz::before {
+      content: "// SYS.VRAM.COMPRESS";
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+    }
+
+    .vram-hero-viz::after {
+      content: "LIVE";
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      padding: 2px 8px;
+      border: 1px solid var(--accent);
+      animation: pulseDot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .vram-caption-top {
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--text-sub);
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .vram-bar-wrap {
+      position: relative;
+      height: 56px;
+      border: 2px solid var(--accent);
+      background: var(--bg-body);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .vram-bar-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--accent) 0px, var(--accent) 8px,
+        var(--accent-hover) 8px, var(--accent-hover) 10px
+      );
+      box-shadow: inset 0 0 20px var(--accent-glow);
+      animation: vramFill 7s ease-in-out infinite;
+    }
+
+    @keyframes vramFill {
+      0%      { width: 0%;  background-color: var(--accent); }
+      25%     { width: 100%; }
+      35%     { width: 100%; filter: brightness(1.3); }
+      55%     { width: 17%;  }
+      85%     { width: 17%;  }
+      100%    { width: 0%;  }
+    }
+
+    .vram-turbo-sweep {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 80px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--accent-bright) 50%,
+        transparent 100%);
+      opacity: 0;
+      animation: turboSweep 7s ease-in-out infinite;
+    }
+
+    @keyframes turboSweep {
+      0%, 30%  { left: -80px; opacity: 0; }
+      35%      { opacity: 1; }
+      50%      { left: calc(100% + 80px); opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .vram-tick-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--text-sub);
+      letter-spacing: 1px;
+      margin-bottom: 28px;
+    }
+
+    .vram-stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      font-family: var(--font-mono-sys);
+    }
+
+    .vram-stat {
+      text-align: center;
+    }
+
+    .vram-stat .num {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .vram-stat .lbl {
+      display: block;
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+
+    .vram-arrow {
+      font-family: var(--font-mono-sys);
+      font-size: 20px;
+      color: var(--accent);
+    }
+
+    .vram-final-badge {
+      margin-top: 22px;
+      padding: 8px 14px;
+      border: 1px dashed var(--accent);
+      text-align: center;
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--accent);
+      align-self: center;
+    }
+
+    /* ============================================================
+       ANIMATION 1: MEMORY WALL
+       Token stream + KV stack + VRAM/Compute gauges
+       ============================================================ */
+    .demo-viz {
+      position: relative;
+      width: 100%;
+      margin: 28px 0;
+      padding: 28px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .demo-viz::before {
+      content: attr(data-label);
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+    }
+
+    .demo-caption {
+      margin-top: 18px;
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--text-sub);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* -- KV Cache Demo (Anim 1) -- */
+    .kv-demo {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 20px;
+      align-items: stretch;
+      min-height: 220px;
+      padding-top: 20px;
+    }
+
+    .kv-stream {
+      position: relative;
+      border-right: 1px dashed var(--border);
+      padding-right: 14px;
+      overflow: hidden;
+    }
+
+    .kv-stream-label {
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      color: var(--text-sub);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .kv-token {
+      display: inline-block;
+      font-family: var(--font-mono-code);
+      font-size: 11px;
+      padding: 3px 8px;
+      margin: 3px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      opacity: 0;
+      animation: tokenAppear 8s linear infinite;
+    }
+
+    .kv-token:nth-child(1) { animation-delay: 0.0s; }
+    .kv-token:nth-child(2) { animation-delay: 0.4s; }
+    .kv-token:nth-child(3) { animation-delay: 0.8s; }
+    .kv-token:nth-child(4) { animation-delay: 1.2s; }
+    .kv-token:nth-child(5) { animation-delay: 1.6s; }
+    .kv-token:nth-child(6) { animation-delay: 2.0s; }
+    .kv-token:nth-child(7) { animation-delay: 2.4s; }
+    .kv-token:nth-child(8) { animation-delay: 2.8s; }
+    .kv-token:nth-child(9) { animation-delay: 3.2s; }
+    .kv-token:nth-child(10) { animation-delay: 3.6s; }
+    .kv-token:nth-child(11) { animation-delay: 4.0s; }
+    .kv-token:nth-child(12) { animation-delay: 4.4s; }
+
+    @keyframes tokenAppear {
+      0%   { opacity: 0; transform: translateX(-10px); }
+      8%   { opacity: 1; transform: translateX(0); }
+      60%  { opacity: 1; }
+      75%, 100% { opacity: 0; }
+    }
+
+    .kv-gpu {
+      position: relative;
+      border: 2px solid var(--accent);
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-body);
+    }
+
+    .kv-gpu::before {
+      content: "GPU VRAM";
+      position: absolute;
+      top: -9px;
+      left: 10px;
+      background: var(--bg-card);
+      padding: 0 6px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--accent);
+    }
+
+    .kv-cache-label {
+      font-family: var(--font-mono-sys);
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .kv-stack {
+      flex: 1;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .kv-block {
+      height: 10px;
+      background: var(--accent);
+      opacity: 0;
+      transform: scaleX(0.3);
+      transform-origin: left;
+      animation: blockStack 8s ease-out infinite;
+    }
+
+    .kv-block:nth-child(1)  { animation-delay: 0.5s; }
+    .kv-block:nth-child(2)  { animation-delay: 1.0s; }
+    .kv-block:nth-child(3)  { animation-delay: 1.5s; }
+    .kv-block:nth-child(4)  { animation-delay: 2.0s; }
+    .kv-block:nth-child(5)  { animation-delay: 2.5s; }
+    .kv-block:nth-child(6)  { animation-delay: 3.0s; }
+    .kv-block:nth-child(7)  { animation-delay: 3.5s; }
+    .kv-block:nth-child(8)  { animation-delay: 4.0s; }
+    .kv-block:nth-child(9)  { animation-delay: 4.5s; background: #d14b4b; }
+    .kv-block:nth-child(10) { animation-delay: 5.0s; background: #d14b4b; }
+    .kv-block:nth-child(11) { animation-delay: 5.5s; background: #d14b4b; }
+    .kv-block:nth-child(12) { animation-delay: 6.0s; background: #d14b4b; }
+
+    @keyframes blockStack {
+      0%   { opacity: 0; transform: scaleX(0.3); }
+      8%   { opacity: 1; transform: scaleX(1); }
+      82%  { opacity: 1; transform: scaleX(1); }
+      92%, 100% { opacity: 0; transform: scaleX(0.3); }
+    }
+
+    .kv-gauges {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-left: 14px;
+      border-left: 1px dashed var(--border);
+    }
+
+    .gauge {
+      font-family: var(--font-mono-sys);
+    }
+
+    .gauge-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .gauge-bar {
+      height: 14px;
+      background: var(--bg-body);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gauge-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      background: var(--accent);
+    }
+
+    .gauge-fill.compute {
+      width: 20%;
+      opacity: 0.7;
+    }
+
+    .gauge-fill.vram {
+      animation: vramCrush 8s ease-in-out infinite;
+    }
+
+    @keyframes vramCrush {
+      0%   { width: 0%;   background: var(--accent); }
+      55%  { width: 100%; background: var(--accent); }
+      65%  { width: 100%; background: #d14b4b; }
+      85%  { width: 100%; background: #d14b4b; filter: brightness(1.4); }
+      92%, 100% { width: 0%; background: var(--accent); }
+    }
+
+    .gauge-verdict {
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 8px 10px;
+      border: 1px dashed var(--accent);
+      margin-top: auto;
+      color: var(--accent);
+      text-align: center;
+    }
+
+    /* ============================================================
+       ANIMATION 2: POLAR ROTATION (CSS-driven SVG)
+       ============================================================ */
+    .polar-demo {
+      position: relative;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 20px;
+    }
+
+    .polar-stage {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 20px 20px,
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 20px 20px,
+        var(--bg-body);
+    }
+
+    /* Polar rings that fade in during phase 3 */
+    .polar-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 1px dashed var(--accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      animation: ringAppear 9s ease-in-out infinite;
+    }
+    .polar-ring.r1 { width: 60px;  height: 60px;  }
+    .polar-ring.r2 { width: 140px; height: 140px; }
+    .polar-ring.r3 { width: 220px; height: 220px; }
+
+    @keyframes ringAppear {
+      0%, 55% { opacity: 0; }
+      65%     { opacity: 0.7; }
+      90%     { opacity: 0.7; }
+      95%, 100% { opacity: 0; }
+    }
+
+    /* Scatter points: each has a "chaotic" start, a "uniform" mid, and a "polar-snap" end */
+    .polar-pt {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      border-radius: 50%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      animation: polarJourney 9s ease-in-out infinite;
+    }
+
+    /* The variables --x1/y1 (chaotic), --x2/y2 (uniform), --x3/y3 (polar ring) are inline */
+    @keyframes polarJourney {
+      0%, 20% {
+        transform: translate(calc(-50% + var(--x1)), calc(-50% + var(--y1)));
+      }
+      35%, 50% {
+        transform: translate(calc(-50% + var(--x2)), calc(-50% + var(--y2)));
+      }
+      65%, 88% {
+        transform: translate(calc(-50% + var(--x3)), calc(-50% + var(--y3)));
+      }
+      95%, 100% {
+        transform: translate(calc(-50% + var(--x1)), calc(-50% + var(--y1)));
+      }
+    }
+
+    .polar-phase-label {
+      position: absolute;
+      bottom: -28px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: var(--font-mono-sys);
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+    }
+
+    .polar-phase-label span {
+      display: inline-block;
+      padding: 2px 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      animation: phaseLabel 9s step-end infinite;
+    }
+
+    @keyframes phaseLabel {
+      0%   { content: ""; }
+    }
+
+    .polar-phase-label .p1,
+    .polar-phase-label .p2,
+    .polar-phase-label .p3 {
+      opacity: 0;
+      animation: phaseShow 9s ease-in-out infinite;
+    }
+    .polar-phase-label .p1 { animation-delay: 0s; }
+    .polar-phase-label .p2 { animation-delay: 3s; }
+    .polar-phase-label .p3 { animation-delay: 6s; }
+
+    @keyframes phaseShow {
+      0%, 2%    { opacity: 0; }
+      6%, 30%   { opacity: 1; }
+      34%, 100% { opacity: 0; }
+    }
+
+    .polar-phase-label > span {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    .polar-eq {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-family: var(--font-mono-code);
+      font-size: 11px;
+      color: var(--accent);
+      opacity: 0;
+      animation: eqAppear 9s ease-in-out infinite;
+    }
+
+    @keyframes eqAppear {
+      0%, 18%   { opacity: 0; }
+      22%, 55%  { opacity: 1; }
+      60%, 100% { opacity: 0; }
+    }
+
+    /* ============================================================
+       ANIMATION 3: QJL 1-BIT CORRECTION
+       ============================================================ */
+    .qjl-demo {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 24px;
+      align-items: center;
+      padding-top: 20px;
+      min-height: 240px;
+    }
+
+    .qjl-vectors {
+      position: relative;
+      height: 200px;
+      background: var(--bg-body);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .qjl-origin {
+      position: absolute;
+      left: 50%;
+      top: 70%;
+      width: 6px;
+      height: 6px;
+      background: var(--text-sub);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .qjl-vector {
+      position: absolute;
+      left: 50%;
+      top: 70%;
+      height: 2px;
+      transform-origin: 0% 50%;
+      background: var(--accent);
+    }
+
+    .qjl-vector::after {
+      content: "";
+      position: absolute;
+      right: -2px;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid var(--accent);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    .qjl-vector.query {
+      width: 90px;
+      transform: rotate(-45deg);
+    }
+
+    .qjl-vector.key {
+      width: 70px;
+      opacity: 0.55;
+      filter: blur(0.5px);
+      transform: rotate(-25deg);
+      animation: keyWobble 4s ease-in-out infinite;
+    }
+
+    @keyframes keyWobble {
+      0%, 100% { transform: rotate(-25deg); }
+      50%      { transform: rotate(-21deg); }
+    }
+
+    .qjl-tag {
+      position: absolute;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--accent);
+    }
+
+    .qjl-tag.q-tag { top: 12px; left: 40%; }
+    .qjl-tag.k-tag { top: 44%; left: 56%; opacity: 0.65; }
+
+    .qjl-bit {
+      position: absolute;
+      left: 10%;
+      top: 30%;
+      font-family: var(--font-mono-code);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-bright);
+      opacity: 0;
+      animation: bitFly 4s ease-in-out infinite;
+    }
+
+    @keyframes bitFly {
+      0%, 30%   { opacity: 0; transform: translate(0, 0) scale(0.5); }
+      45%       { opacity: 1; transform: translate(80px, 20px) scale(1); }
+      60%       { opacity: 1; transform: translate(140px, 40px) scale(1.2); }
+      70%       { opacity: 0; transform: translate(180px, 60px) scale(0.8); }
+      100%      { opacity: 0; transform: translate(0, 0) scale(0.5); }
+    }
+
+    .qjl-gauge {
+      font-family: var(--font-mono-sys);
+    }
+
+    .qjl-gauge-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+      margin-bottom: 10px;
+    }
+
+    .qjl-track {
+      position: relative;
+      height: 30px;
+      background: var(--bg-body);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .qjl-track-target {
+      position: absolute;
+      left: 50%;
+      top: -4px;
+      bottom: -4px;
+      width: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+    .qjl-track-target::before {
+      content: "TARGET 16-BIT";
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 8px;
+      letter-spacing: 1px;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .qjl-needle {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      width: 6px;
+      background: #d14b4b;
+      left: 30%;
+      animation: needleSnap 4s ease-in-out infinite;
+    }
+
+    @keyframes needleSnap {
+      0%, 35%   { left: 30%; background: #d14b4b; }
+      50%       { left: 32%; background: #d14b4b; }
+      65%       { left: 49%; background: var(--accent); }
+      80%, 100% { left: 30%; background: #d14b4b; }
+    }
+
+    .qjl-gauge-status {
+      position: relative;
+      height: 20px;
+      font-size: 9px;
+      letter-spacing: 2px;
+      padding: 6px 10px;
+      border-left: 2px solid #d14b4b;
+      animation: statusBorder 4s ease-in-out infinite;
+    }
+
+    @keyframes statusBorder {
+      0%, 45%   { border-left-color: #d14b4b; }
+      55%, 80%  { border-left-color: var(--accent); }
+      100%      { border-left-color: #d14b4b; }
+    }
+
+    .qjl-gauge-status .drift,
+    .qjl-gauge-status .locked {
+      position: absolute;
+      left: 10px;
+      top: 6px;
+    }
+
+    .qjl-gauge-status .drift {
+      color: #d14b4b;
+      animation: fadeDrift 4s ease-in-out infinite;
+    }
+
+    .qjl-gauge-status .locked {
+      color: var(--accent);
+      animation: fadeLocked 4s ease-in-out infinite;
+    }
+
+    @keyframes fadeDrift {
+      0%, 45%   { opacity: 1; }
+      55%, 80%  { opacity: 0; }
+      100%      { opacity: 1; }
+    }
+
+    @keyframes fadeLocked {
+      0%, 45%   { opacity: 0; }
+      55%, 80%  { opacity: 1; }
+      100%      { opacity: 0; }
+    }
+
+    /* ============================================================
+       RESULTS CARD (Section 5)
+       ============================================================ */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0 8px;
+    }
+
+    .result-tile {
+      padding: 20px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+    }
+
+    .result-tile .num {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .result-tile .lbl {
+      margin-top: 8px;
+      font-family: var(--font-mono-sys);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-sub);
+    }
+
+    .result-tile .sub {
+      margin-top: 4px;
+      font-family: var(--font-serif);
+      font-size: 12px;
+      color: var(--text-main);
+      font-style: italic;
+    }
+
+    .memory-compare {
+      margin: 18px 0 8px;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono-sys);
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .memory-compare .row {
+      display: grid;
+      grid-template-columns: 120px 1fr 80px;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .memory-compare .row:last-child { margin-bottom: 0; }
+
+    .mc-label { color: var(--text-sub); font-size: 9px; letter-spacing: 2px; }
+    .mc-track {
+      height: 14px;
+      background: var(--bg-body);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .mc-fill {
+      height: 100%;
+      background: var(--accent);
+    }
+    .mc-fill.wide { width: 100%; opacity: 0.7; }
+    .mc-fill.slim { width: 16.5%; }
+    .mc-val { text-align: right; font-size: 10px; color: var(--accent); }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 768px) {
+      .kv-demo {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .kv-stream { border-right: none; border-bottom: 1px dashed var(--border); padding-right: 0; padding-bottom: 12px; }
+      .kv-gauges { border-left: none; border-top: 1px dashed var(--border); padding-left: 0; padding-top: 12px; }
+
+      .qjl-demo { grid-template-columns: 1fr; }
+      .polar-stage { width: 240px; height: 240px; }
+
+      .results-grid { grid-template-columns: 1fr; }
+      .vram-stat .num { font-size: 22px; }
+      .memory-compare .row { grid-template-columns: 90px 1fr 60px; }
+    }
+  </style>
+  <script src="../assets/js/theme-init.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CY4SYW20XE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-CY4SYW20XE');
+  </script>
+</head>
+
+<body>
+  <div class="scroll-indicator" id="scrollIndicator"></div>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="header">
+    <a href="../index.html" class="header-brand">
+      <span class="brand-logo-text">BIT<span class="brand-connector">by</span>BIT</span>
+    </a>
+    <div class="header-status">
+      <span class="header-tagline">
+        Breaking down tech <br> one bit at a time
+      </span>
+      <button id="themeToggle" title="Toggle Theme">
+        <svg id="iconSun" viewBox="0 0 24 24" style="display: block;">
+          <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
+        </svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" style="fill: none; stroke: var(--text-sub); stroke-width: 2; display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+
+    <!-- ── HERO ──────────────────────────────────────────── -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-container">
+        <div class="hero-text-side">
+          <h1 class="hero-title">TurboQuant: How Google Compressed LLM Memory 6x</h1>
+          <p class="hero-subtitle">
+            Google Research squeezed a 448&nbsp;GB memory budget into 74&nbsp;GB with no retraining and no accuracy loss. Here's how PolarQuant and QJL actually work.
+          </p>
+        </div>
+
+        <div class="hero-visual-side">
+          <div class="hero-image-wrapper">
+            <div class="vram-hero-viz">
+              <div class="vram-caption-top">KV CACHE • 104B MODEL • 128K CONTEXT</div>
+
+              <div class="vram-bar-wrap">
+                <div class="vram-bar-fill"></div>
+                <div class="vram-turbo-sweep"></div>
+              </div>
+
+              <div class="vram-tick-row">
+                <span>0 GB</span>
+                <span>224 GB</span>
+                <span>448 GB</span>
+              </div>
+
+              <div class="vram-stats">
+                <div class="vram-stat">
+                  <span class="num">448</span>
+                  <span class="lbl">GB BEFORE</span>
+                </div>
+                <span class="vram-arrow">→</span>
+                <div class="vram-stat">
+                  <span class="num">74</span>
+                  <span class="lbl">GB AFTER</span>
+                </div>
+              </div>
+
+              <div class="vram-final-badge">6× LESS MEMORY · 0% ACCURACY LOST</div>
+            </div>
+          </div>
+
+          <div class="hero-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Date
+              </span>
+              <span class="meta-value">2026.04.18</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Time
+              </span>
+              <span class="meta-value">10 Min Read</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                Series
+              </span>
+              <span class="meta-value">Bit by Bit</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                Tags
+              </span>
+              <div class="tags-container">
+                <span class="tag">AI / ML</span>
+                <span class="tag">LLM</span>
+                <span class="tag">Quantization</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CONTENT LAYOUT ────────────────────────────────── -->
+    <div class="content-layout">
+      <aside class="meta-sidebar" id="metaSidebar">
+        <div class="sidebar-mini-header">
+          <div class="mini-badge">// NOW_READING</div>
+          <div class="mini-title">TurboQuant</div>
+        </div>
+
+        <nav class="toc-container">
+          <span class="toc-label">Contents</span>
+          <ul class="toc-list" id="tocList">
+            <li><a href="#intro" class="toc-link">Introduction</a></li>
+            <li><a href="#memory-wall" class="toc-link">The Memory Wall</a></li>
+            <li><a href="#polarquant" class="toc-link">Step 1: PolarQuant</a></li>
+            <li><a href="#qjl" class="toc-link">Step 2: QJL</a></li>
+            <li><a href="#results" class="toc-link">The Results</a></li>
+            <li><a href="#takeaways" class="toc-link">Developer Takeaways</a></li>
+            <li><a href="#resources" class="toc-link">Official Resources</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-column">
+        <div class="article-content">
+
+          <!-- ── INTRO ──────────────────────────────────── -->
+          <p id="intro">
+            If you've ever wondered why running a state-of-the-art LLM seems to need a small server farm, here's the short answer: <strong>it's not the math that's slow. It's the memory.</strong> Every token your model has "seen" gets stored in something called a <em>KV cache</em>, and that cache grows linearly with context length. Double the context, double the VRAM.
+          </p>
+
+          <p>
+            The usual fix has been to just buy more H100s. In early 2026, Google Research published a different approach called <strong>TurboQuant</strong>: a training-free algorithm that compresses the KV cache to <strong>just 3 bits per value</strong>, cuts memory by <strong>6×</strong>, and speeds up inference by <strong>8×</strong> with no accuracy loss.
+          </p>
+
+          <p>
+            This post walks through how it actually works, with animations for each step.
+          </p>
+
+          <div class="divider"></div>
+
+          <!-- ── SECTION 2: THE MEMORY WALL ──────────────── -->
+          <h2 id="memory-wall">The Memory Wall</h2>
+
+          <p>
+            Think of an LLM like a student taking notes during a very long lecture. Every word the lecturer says, the student writes down two things in their notebook: a <strong>Key</strong> (a tag to find the word later) and a <strong>Value</strong> (what the word actually means in context). That notebook <em>is</em> the KV cache.
+          </p>
+
+          <p>
+            The problem is simple: the longer the lecture, the bigger the notebook gets. Double the length and you need twice as much desk space. For a 104-billion-parameter model with a 128K context window, that desk space works out to roughly <strong>448 GB of GPU memory</strong>. And that's before any actual computation.
+          </p>
+
+          <div class="demo-viz" data-label="// ANIM_01 · KV_CACHE_GROWTH">
+            <div class="kv-demo">
+              <div class="kv-stream">
+                <div class="kv-stream-label">INCOMING TOKENS →</div>
+                <span class="kv-token">the</span>
+                <span class="kv-token">quick</span>
+                <span class="kv-token">brown</span>
+                <span class="kv-token">fox</span>
+                <span class="kv-token">jumps</span>
+                <span class="kv-token">over</span>
+                <span class="kv-token">the</span>
+                <span class="kv-token">lazy</span>
+                <span class="kv-token">dog</span>
+                <span class="kv-token">and</span>
+                <span class="kv-token">runs</span>
+                <span class="kv-token">away</span>
+              </div>
+
+              <div class="kv-gpu">
+                <div class="kv-cache-label">KV CACHE · GROWS LINEARLY</div>
+                <div class="kv-stack">
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                  <div class="kv-block"></div>
+                </div>
+              </div>
+
+              <div class="kv-gauges">
+                <div class="gauge">
+                  <div class="gauge-label"><span>COMPUTE</span><span>20%</span></div>
+                  <div class="gauge-bar"><div class="gauge-fill compute"></div></div>
+                </div>
+                <div class="gauge">
+                  <div class="gauge-label"><span>VRAM</span><span>OVERFLOW</span></div>
+                  <div class="gauge-bar"><div class="gauge-fill vram"></div></div>
+                </div>
+                <div class="gauge-verdict">MEMORY = BOTTLENECK</div>
+              </div>
+            </div>
+            <div class="demo-caption">As tokens stream in, KV blocks stack up. Compute stays idle at 20% while VRAM fills to 100% and overflows. The GPU is starved, not of math, but of memory.</div>
+          </div>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              The uncomfortable truth
+            </div>
+            <p style="margin-bottom: 0;">A modern H100 GPU has 80 GB of VRAM. The KV cache for one long-context query can easily need 5 or 6 of them. That's why long-context inference costs so much. You're renting entire GPU clusters just to hold notes.</p>
+          </div>
+
+          <!-- ── SECTION 3: POLARQUANT ───────────────────── -->
+          <h2 id="polarquant">Step 1: PolarQuant. Rotate First, Then Compress</h2>
+
+          <p>
+            The obvious fix is to use shorter numbers. Replace 16-bit floats with 8-bit or 4-bit. The technical term is <strong>quantization</strong>.
+          </p>
+
+          <p>
+            The problem is that KV cache data is <strong>spiky</strong>. A few dimensions have huge values (outliers), most are tiny. Uniform quantization either destroys the outliers or wastes precision on the tiny values. Neither is acceptable.
+          </p>
+
+          <p>
+            <strong>PolarQuant</strong> multiplies every vector by a <em>random orthogonal matrix</em> before compressing it. An orthogonal matrix is a rotation: it changes direction but preserves length. A random rotation spreads the "energy" of any vector evenly across all its dimensions. Spikes flatten out. The data becomes smooth and predictable.
+          </p>
+
+          <div class="demo-viz" data-label="// ANIM_02 · POLAR_ROTATION">
+            <div class="polar-demo">
+              <div class="polar-stage">
+                <div class="polar-eq">R · x</div>
+
+                <div class="polar-ring r1"></div>
+                <div class="polar-ring r2"></div>
+                <div class="polar-ring r3"></div>
+
+                <!-- 16 scatter points. --x1/y1 = chaotic (spiky). --x2/y2 = uniform sphere. --x3/y3 = on polar ring. -->
+                <div class="polar-pt" style="--x1:-95px;--y1:-35px;--x2:-70px;--y2:-20px;--x3:-70px;--y3:0px;"></div>
+                <div class="polar-pt" style="--x1:90px;--y1:-80px;--x2:50px;--y2:-50px;--x3:49px;--y3:-49px;"></div>
+                <div class="polar-pt" style="--x1:15px;--y1:-100px;--x2:10px;--y2:-70px;--x3:0px;--y3:-70px;"></div>
+                <div class="polar-pt" style="--x1:-40px;--y1:80px;--x2:-30px;--y2:40px;--x3:-49px;--y3:49px;"></div>
+                <div class="polar-pt" style="--x1:100px;--y1:10px;--x2:70px;--y2:5px;--x3:70px;--y3:0px;"></div>
+                <div class="polar-pt" style="--x1:-80px;--y1:-90px;--x2:-50px;--y2:-50px;--x3:-49px;--y3:-49px;"></div>
+                <div class="polar-pt" style="--x1:50px;--y1:90px;--x2:40px;--y2:30px;--x3:49px;--y3:49px;"></div>
+                <div class="polar-pt" style="--x1:-10px;--y1:95px;--x2:-10px;--y2:55px;--x3:0px;--y3:70px;"></div>
+                <div class="polar-pt" style="--x1:30px;--y1:-40px;--x2:25px;--y2:-25px;--x3:21px;--y3:-21px;"></div>
+                <div class="polar-pt" style="--x1:-50px;--y1:20px;--x2:-35px;--y2:10px;--x3:-30px;--y3:0px;"></div>
+                <div class="polar-pt" style="--x1:75px;--y1:60px;--x2:35px;--y2:25px;--x3:21px;--y3:21px;"></div>
+                <div class="polar-pt" style="--x1:-85px;--y1:50px;--x2:-45px;--y2:30px;--x3:-49px;--y3:49px;"></div>
+                <div class="polar-pt" style="--x1:20px;--y1:30px;--x2:15px;--y2:20px;--x3:21px;--y3:21px;"></div>
+                <div class="polar-pt" style="--x1:-5px;--y1:-65px;--x2:-5px;--y2:-40px;--x3:0px;--y3:-30px;"></div>
+                <div class="polar-pt" style="--x1:65px;--y1:-30px;--x2:35px;--y2:-15px;--x3:30px;--y3:0px;"></div>
+                <div class="polar-pt" style="--x1:-95px;--y1:90px;--x2:-45px;--y2:45px;--x3:-49px;--y3:49px;"></div>
+              </div>
+
+              <div class="polar-phase-label">
+                <span class="p1">1 · SPIKY CARTESIAN</span>
+                <span class="p2">2 · ROTATED · SMOOTH</span>
+                <span class="p3">3 · SNAPPED TO POLAR RINGS</span>
+              </div>
+            </div>
+            <div class="demo-caption">Messy scatter → random rotation smooths it out → points snap onto polar rings (radius + angle). Compressing angles is cheap; the distribution is now tight and predictable.</div>
+          </div>
+
+          <p>
+            After rotation, PolarQuant switches from Cartesian coordinates (x, y, z) to <strong>polar coordinates</strong>: one radius plus a set of angles. Since the rotation makes all the angles follow a tight, predictable distribution, those angles compress into just a handful of bits without losing meaningful information.
+          </p>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Why this is clever
+            </div>
+            <p style="margin-bottom: 0;">Normal quantization stores <em>metadata</em> per block: "this block's range is 0–20, that one's 0–500". That overhead adds up. PolarQuant's rotation makes every block behave the same way, so you only store the rule once.</p>
+          </div>
+
+          <!-- ── SECTION 4: QJL ──────────────────────────── -->
+          <h2 id="qjl">Step 2: QJL. The 1-Bit Correction</h2>
+
+          <p>
+            PolarQuant handles most of the compression, but the attention mechanism is picky. It computes dot products between Query and Key vectors, and even a small rounding error gets amplified by softmax. Left alone, those errors break the output.
+          </p>
+
+          <p>
+            That's where <strong>Quantized Johnson-Lindenstrauss (QJL)</strong> comes in. Take the leftover rounding error from PolarQuant and represent it with just a <strong>single sign bit</strong>, either <code>+1</code> or <code>-1</code>. That bit nudges the dot product back onto the correct value during inference.
+          </p>
+
+          <div class="demo-viz" data-label="// ANIM_03 · QJL_CORRECTION">
+            <div class="qjl-demo">
+              <div class="qjl-vectors">
+                <div class="qjl-origin"></div>
+                <div class="qjl-vector query"></div>
+                <div class="qjl-vector key"></div>
+                <div class="qjl-tag q-tag">Q · 16-bit</div>
+                <div class="qjl-tag k-tag">K · 3-bit</div>
+                <div class="qjl-bit">±1</div>
+              </div>
+
+              <div class="qjl-gauge">
+                <div class="qjl-gauge-title">DOT-PRODUCT PRECISION</div>
+                <div class="qjl-track">
+                  <div class="qjl-track-target"></div>
+                  <div class="qjl-needle"></div>
+                </div>
+                <div class="qjl-gauge-status">
+                  <span class="drift">STATUS: DRIFT</span>
+                  <span class="locked">STATUS: LOCKED</span>
+                </div>
+              </div>
+            </div>
+            <div class="demo-caption">A high-precision Query and a compressed Key produce a slightly-off dot product. One sign bit (±1) flies into the math, and the precision gauge snaps to the 16-bit target. No extra bytes, no accuracy loss.</div>
+          </div>
+
+          <p>
+            Keys and Values sit in 3 bits, and attention scores come out mathematically indistinguishable from the full 16-bit version. Custom <strong>Triton fused attention kernels</strong> let the GPU compute dot products directly on compressed data, skipping any decompression step entirely.
+          </p>
+
+          <div class="divider"></div>
+
+          <!-- ── SECTION 5: RESULTS ──────────────────────── -->
+          <h2 id="results">The Results</h2>
+
+          <p>
+            Put PolarQuant and QJL together and the numbers look like this:
+          </p>
+
+          <div class="results-grid">
+            <div class="result-tile">
+              <span class="num">6×</span>
+              <span class="lbl">LESS MEMORY</span>
+              <span class="sub">448 GB → 74 GB</span>
+            </div>
+            <div class="result-tile">
+              <span class="num">8×</span>
+              <span class="lbl">FASTER ATTN</span>
+              <span class="sub">on H100 GPUs</span>
+            </div>
+            <div class="result-tile">
+              <span class="num">0%</span>
+              <span class="lbl">ACCURACY LOST</span>
+              <span class="sub">perfect needle-in-haystack</span>
+            </div>
+          </div>
+
+          <div class="memory-compare">
+            <div class="row">
+              <span class="mc-label">BEFORE</span>
+              <div class="mc-track"><div class="mc-fill wide"></div></div>
+              <span class="mc-val">448 GB</span>
+            </div>
+            <div class="row">
+              <span class="mc-label">AFTER</span>
+              <div class="mc-track"><div class="mc-fill slim"></div></div>
+              <span class="mc-val">74 GB</span>
+            </div>
+          </div>
+
+          <p>
+            74 GB fits on a single H100. Before TurboQuant, the same workload needed five or six H100s just for the cache. The speedup comes from less data moving between VRAM and GPU cores, not from faster arithmetic.
+          </p>
+
+          <!-- ── SECTION 6: TAKEAWAYS ────────────────────── -->
+          <h2 id="takeaways">Developer Takeaways</h2>
+
+          <p>
+            Here's why this matters for anyone building on top of open-source LLMs:
+          </p>
+
+          <ul class="check-list">
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>Training-free:</strong> TurboQuant is "data-oblivious". No retraining, no fine-tuning, no calibration dataset. You apply it to weights you already have.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>Drop-in for open models:</strong> Works with Llama&nbsp;3, Mistral, Qwen, and other standard transformer architectures out of the box.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>Local inference gets real:</strong> A 128K-context workflow that previously needed a data-center rack now fits on a single high-end card, and eventually on a workstation.
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>Long context becomes cheap:</strong> The cost of giving a model a million tokens of history stops being about memory rental and starts being about actual compute.
+            </li>
+          </ul>
+
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Bottom line
+            </div>
+            <p style="margin-bottom: 0;">For years, scaling context windows meant buying more VRAM. TurboQuant shows that a chunk of that cost was covering up an algorithmic gap. The path to accessible, on-device inference runs through math like this, <em>not</em> through bigger GPUs.</p>
+          </div>
+
+          <!-- ── OFFICIAL RESOURCES ─────────────────────── -->
+          <h2 id="resources">Official Resources</h2>
+
+          <div class="resources-grid">
+
+            <a href="https://research.google/blog/turboquant-training-free-compression-for-kv-cache/" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">Google Research</div>
+              <div class="resource-header">TurboQuant Announcement</div>
+              <div class="resource-desc">Google's official write-up of the PolarQuant + QJL combination and headline 6× / 8× results.</div>
+            </a>
+
+            <a href="https://github.com/triton-lang/triton" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">GitHub</div>
+              <div class="resource-header">Triton (GPU Kernels)</div>
+              <div class="resource-desc">The open-source GPU kernel language TurboQuant uses to fuse its custom attention operations directly against the compressed KV cache.</div>
+            </a>
+
+            <a href="https://arxiv.org/abs/2405.12981" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">arXiv</div>
+              <div class="resource-header">RaBitQ (Prior Work)</div>
+              <div class="resource-desc">The earlier random-rotation vector quantization paper that underpins many of the geometric tricks used here.</div>
+            </a>
+
+            <a href="https://en.wikipedia.org/wiki/Johnson%E2%80%93Lindenstrauss_lemma" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">Wikipedia</div>
+              <div class="resource-header">Johnson–Lindenstrauss Lemma</div>
+              <div class="resource-desc">The classical result behind QJL: why random projections into lower dimensions preserve distances.</div>
+            </a>
+
+          </div>
+
+          <!-- ── RECOMMENDATIONS ────────────────────────── -->
+          <section class="recommendations-section">
+            <div class="recommendations-header">
+              <h2>→ Continue Reading</h2>
+            </div>
+
+            <div class="recommendations-grid">
+              <a href="claude-opus-blog.html" class="rec-card">
+                <div class="rec-badge">Related</div>
+                <h3>Claude Opus 4.6: The New Frontier in AI</h3>
+                <p class="rec-excerpt">
+                  Another angle on the long-context problem: how Anthropic is scaling context windows with agent teams and reasoning control.
+                </p>
+                <div class="rec-footer">
+                  <div class="rec-meta">
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                      2026.02.07
+                    </span>
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      15 Min Read
+                    </span>
+                  </div>
+                  <div class="rec-btn">Read →</div>
+                </div>
+              </a>
+
+              <a href="../index.html" class="rec-card">
+                <div class="rec-badge">Home</div>
+                <h3>Explore More Topics</h3>
+                <p class="rec-excerpt">
+                  More posts in the Bit by Bit series, each one picking apart a piece of modern AI infrastructure.
+                </p>
+                <div class="rec-footer">
+                  <div class="rec-meta">
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                      Homepage
+                    </span>
+                  </div>
+                  <div class="rec-btn">Browse All →</div>
+                </div>
+              </a>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ────────────────────────────────────────── -->
+  <footer class="simple-footer">
+    <div class="footer-content">
+      <a href="https://thejus-m.is-a.dev" class="footer-home-mark" title="Return Home">T</a>
+      <div class="footer-info">
+        <span>Bit by Bit Series • 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── MOBILE TOC ─────────────────────────────────────── -->
+  <button id="mobileTocBtn" class="mobile-toc-fab" aria-label="Open Table of Contents" onclick="document.getElementById('mobileTocOverlay').classList.add('active')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <div id="mobileTocOverlay" class="mobile-toc-overlay">
+    <div class="mobile-toc-backdrop" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')"></div>
+    <div class="mobile-toc-sheet" id="mobileTocSheet">
+      <div class="mobile-toc-handle-bar">
+        <div class="mobile-toc-handle"></div>
+      </div>
+      <div class="mobile-toc-header">
+        <div class="mobile-toc-header-text">
+          <span class="mobile-toc-tag">// BIT_BY_BIT_LOG</span>
+          <span class="mobile-toc-title-main">TurboQuant</span>
+        </div>
+        <button id="mobileTocClose" class="mobile-toc-close" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="mobile-toc-content" id="mobileTocContent"></div>
+    </div>
+  </div>
+
+  <script src="../assets/js/blog-common.js"></script>
+  <script src="../assets/js/resource-cache-data.js"></script>
+  <script src="../assets/js/resource-preview.js"></script>
+  <script src="../assets/js/interactions.js"></script>
+</body>
+</html>

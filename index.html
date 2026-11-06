@@ -226,6 +226,29 @@
       fill: var(--text-sub);
     }
 
+    .bb-shake { animation: bbShake 0.25s ease-out !important; }
+    @keyframes bbShake {
+      0%   { transform: translateX(0); }
+      15%  { transform: translateX(-3px); }
+      30%  { transform: translateX(3px); }
+      45%  { transform: translateX(-2px); }
+      60%  { transform: translateX(2px); }
+      75%  { transform: translateX(-1px); }
+      90%  { transform: translateX(1px); }
+      100% { transform: translateX(0); }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      #themeToggle.bb-icon-pop svg {
+        animation: iconPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      @keyframes iconPop {
+        0%   { transform: scale(1) rotate(0deg); }
+        40%  { transform: scale(0.6) rotate(-20deg); }
+        100% { transform: scale(1) rotate(0deg); }
+      }
+    }
+
     /* PAGE LAYOUT */
     .page-wrapper {
       padding-top: 60px;
@@ -640,6 +663,15 @@
   <script src="assets/js/theme-init.js"></script>
   <script src="assets/js/theme-image.js"></script>
   <script src="assets/js/blog-data.js"></script>
+  <script src="assets/js/interactions.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CY4SYW20XE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-CY4SYW20XE');
+  </script>
 </head>
 
 <body>
@@ -786,6 +818,12 @@
     themeBtn.onclick = () => {
       window.ThemeManager.toggle();
       updateThemeIcons();
+      if (window.InteractionManager) {
+        window.InteractionManager.vibe([30, 60, 30]);
+        window.InteractionManager.microBounce(themeBtn);
+      }
+      themeBtn.classList.add('bb-icon-pop');
+      setTimeout(() => themeBtn.classList.remove('bb-icon-pop'), 300);
     };
 
     // --- DYNAMIC BLOG RENDERING ---

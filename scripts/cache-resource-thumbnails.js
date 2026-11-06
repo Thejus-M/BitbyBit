@@ -51,8 +51,16 @@ function getYouTubeId(url) {
 function downloadImage(url, filepath) {
   return new Promise((resolve, reject) => {
     const protocol = url.startsWith('https') ? https : http;
-    
-    const request = protocol.get(url, (response) => {
+
+    // Some CDNs (notably upload.wikimedia.org) reject requests with no UA.
+    const reqOptions = {
+      headers: {
+        'User-Agent': 'BitByBitBlog/1.0 (https://github.com/Thejus-M/BitbyBit; thejus77m@gmail.com) Node.js',
+        'Accept': 'image/*,*/*;q=0.8'
+      }
+    };
+
+    const request = protocol.get(url, reqOptions, (response) => {
       // Handle redirects
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
         downloadImage(response.headers.location, filepath).then(resolve).catch(reject);
@@ -133,9 +141,12 @@ function fetchWikipediaImage(url) {
     // Use Wikipedia API to get page image
     const apiUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${pageTitle}`;
     
+    // Wikipedia API requires a descriptive User-Agent with real contact info.
+    // See https://meta.wikimedia.org/wiki/User-Agent_policy
     const options = {
       headers: {
-        'User-Agent': 'BitByBitBlog/1.0 (https://bitbybit.dev; contact@bitbybit.dev)'
+        'User-Agent': 'BitByBitBlog/1.0 (https://github.com/Thejus-M/BitbyBit; thejus77m@gmail.com) Node.js',
+        'Accept': 'application/json'
       }
     };
     
@@ -167,7 +178,8 @@ function fetchWikipediaImage(url) {
 function extractResourceUrls() {
   const urls = new Set();
   
-  const htmlFiles = fs.readdirSync(BLOGS_DIR).filter(f => f.endsWith('.html'));
+  // Skip the blog-template.html file - it contains REPLACE_URL placeholders
+  const htmlFiles = fs.readdirSync(BLOGS_DIR).filter(f => f.endsWith('.html') && f !== 'blog-template.html');
   
   htmlFiles.forEach(file => {
     const content = fs.readFileSync(path.join(BLOGS_DIR, file), 'utf8');

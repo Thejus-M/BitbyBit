@@ -453,6 +453,10 @@ body::before {
   color: var(--accent);
   font-weight: 600;
   transform: translateX(4px);
+  background: var(--accent-soft);
+  padding-left: 8px;
+  margin-left: -8px;
+  transition: color 0.2s, transform 0.2s, background 0.3s, padding-left 0.2s;
 }
 
 .toc-link.active::before {
@@ -920,8 +924,20 @@ body::before {
 
 .scroll-indicator {
   position: fixed; top: 60px; left: 0; height: 3px;
-  background: var(--accent); width: 0%; z-index: 600;
+  background: linear-gradient(to right, var(--accent), var(--accent-bright));
+  background-size: 100vw 100%;
+  width: 0%; z-index: 600;
   transition: width 0.1s ease-out; box-shadow: 0 0 10px var(--accent-glow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-indicator.bb-complete {
+    animation: indicatorPulse 0.5s ease-out;
+  }
+  @keyframes indicatorPulse {
+    0%, 100% { box-shadow: 0 0 10px var(--accent-glow); }
+    50% { box-shadow: 0 0 24px var(--accent), 0 0 8px var(--accent-bright); }
+  }
 }
 
 .mobile-toc-fab {
@@ -1524,5 +1540,110 @@ body.no-scroll {
 .youtube-icon {
   width: 16px;
   height: 16px;
-  fill: #fff; /* Use white fill for visibility on dark overlay */
+  fill: #fff;
+}
+
+
+/* =========================================
+   MICRO-INTERACTIONS
+   ========================================= */
+.bb-pressed {
+  transform: scale(0.92) !important;
+  transition: transform 0.08s ease-out !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Laptop haptic substitute — rapid shake mimics vibration */
+  .bb-shake {
+    animation: bbShake 0.25s ease-out !important;
+  }
+  @keyframes bbShake {
+    0%   { transform: translateX(0); }
+    15%  { transform: translateX(-3px); }
+    30%  { transform: translateX(3px); }
+    45%  { transform: translateX(-2px); }
+    60%  { transform: translateX(2px); }
+    75%  { transform: translateX(-1px); }
+    90%  { transform: translateX(1px); }
+    100% { transform: translateX(0); }
+  }
+
+  #themeToggle.bb-icon-pop svg {
+    animation: iconPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes iconPop {
+    0%   { transform: scale(1) rotate(0deg); }
+    40%  { transform: scale(0.6) rotate(-20deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+}
+
+/* =========================================
+   CODE BLOCK COPY BUTTON
+   ========================================= */
+pre {
+  position: relative;
+}
+
+.bb-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-sub);
+  font-family: var(--font-mono-sys);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, border-color 0.2s, color 0.2s;
+  text-transform: uppercase;
+  z-index: 5;
+}
+
+pre:hover .bb-copy-btn {
+  opacity: 1;
+}
+
+.bb-copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.bb-copy-btn.bb-copy-done {
+  border-color: var(--accent);
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* =========================================
+   HEADING ENTRANCE ANIMATIONS
+   ========================================= */
+@media (prefers-reduced-motion: no-preference) {
+  .bb-interactions-active .article-content h2[id].bb-heading-hidden {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .bb-interactions-active .article-content h2[id].bb-heading-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* =========================================
+   FAB BOUNCE ON REAPPEAR
+   ========================================= */
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-toc-fab.bb-fab-bounce {
+    animation: fabBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes fabBounce {
+    0%   { transform: scale(0.7); }
+    100% { transform: scale(1); }
+  }
 }

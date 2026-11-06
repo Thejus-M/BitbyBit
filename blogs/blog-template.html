@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- REPLACE: Update title and description -->
+  <title>Article Title — Bit by Bit</title>
+  <meta name="description" content="REPLACE: One-sentence article summary for SEO.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Share+Tech+Mono&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/blog-common.css">
+  <style>
+    /* =====================================================
+       HERO VISUALIZATION
+       Choose ONE of the two patterns below and delete the other.
+       ===================================================== */
+
+    /* --- OPTION A: CSS-only visualization (no image file needed) ---
+       Customize the colors, shapes, and animations below.
+       The ::before / ::after pseudo-elements let you add overlaid UI labels. */
+    .hero-viz {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background-image:
+        radial-gradient(circle at 80% 20%, var(--accent-soft) 0%, transparent 40%),
+        linear-gradient(0deg, var(--bg-card) 0%, transparent 100%),
+        repeating-linear-gradient(45deg, var(--border-sub) 0px, var(--border-sub) 1px, transparent 1px, transparent 10px);
+      background-size: 100% 100%, 100% 50%, 20px 20px;
+      opacity: 0.8;
+    }
+
+    .hero-viz::before {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px; height: 80px;
+      border: 1px dashed var(--accent);
+      border-radius: 50%;
+      animation: spin 10s linear infinite;
+    }
+
+    .hero-viz::after {
+      /* REPLACE: label text */
+      content: "SYS.VISUAL // TOPIC_LABEL";
+      position: absolute;
+      bottom: 20px; right: 20px;
+      font-family: var(--font-mono-sys);
+      color: var(--accent);
+      font-size: 10px;
+      letter-spacing: 2px;
+      border: 1px solid var(--accent);
+      padding: 4px 8px;
+      background: var(--bg-body);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* --- OPTION B: Theme-aware image (requires image file in assets/images/) ---
+       Use the markup below in the hero-image-wrapper div instead of .hero-viz:
+
+       <div class="theme-image-wrapper loading" id="heroImageWrapper">
+         <img
+           data-theme-src="../assets/images/YOUR-THUMBNAIL.png"
+           class="theme-image"
+           alt="REPLACE: descriptive alt text"
+         >
+       </div>
+
+       And include theme-image.js in <head> (already shown below).
+    */
+  </style>
+  <script src="../assets/js/theme-init.js"></script>
+  <!-- Uncomment the line below when using OPTION B (theme-aware image) -->
+  <!-- <script src="../assets/js/theme-image.js"></script> -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CY4SYW20XE"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-CY4SYW20XE');
+  </script>
+</head>
+
+<body>
+  <div class="scroll-indicator" id="scrollIndicator"></div>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="header">
+    <a href="../index.html" class="header-brand">
+      <span class="brand-logo-text">BIT<span class="brand-connector">by</span>BIT</span>
+    </a>
+    <div class="header-status">
+      <span class="header-tagline">
+        Breaking down tech <br> one bit at a time
+      </span>
+      <button id="themeToggle" title="Toggle Theme">
+        <svg id="iconSun" viewBox="0 0 24 24" style="display: block;">
+          <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
+        </svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" style="fill: none; stroke: var(--text-sub); stroke-width: 2; display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+
+    <!-- ── HERO ──────────────────────────────────────────── -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-container">
+
+        <!-- TEXT SIDE -->
+        <div class="hero-text-side">
+          <!-- REPLACE: punchy headline, Space Grotesk bold -->
+          <h1 class="hero-title">Article Title Goes Here</h1>
+          <!-- REPLACE: 1–2 sentence subtitle -->
+          <p class="hero-subtitle">
+            A concise subtitle that explains the core idea and why it matters to the reader right now.
+          </p>
+        </div>
+
+        <!-- VISUAL + META SIDE -->
+        <div class="hero-visual-side">
+          <div class="hero-image-wrapper">
+            <!-- REPLACE: swap for OPTION B markup if using a themed image -->
+            <div class="hero-viz"></div>
+          </div>
+
+          <!-- Meta grid — update values only, keep the SVG icons -->
+          <div class="hero-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Date
+              </span>
+              <!-- REPLACE: YYYY.MM.DD -->
+              <span class="meta-value">2026.MM.DD</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Time
+              </span>
+              <!-- REPLACE: e.g. 10 Min Read -->
+              <span class="meta-value">X Min Read</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                Series
+              </span>
+              <span class="meta-value">Bit by Bit</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                Tags
+              </span>
+              <!-- REPLACE: add/remove <span class="tag"> as needed -->
+              <div class="tags-container">
+                <span class="tag">Category</span>
+                <span class="tag">Topic</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── CONTENT LAYOUT ────────────────────────────────── -->
+    <div class="content-layout">
+
+      <!-- LEFT SIDEBAR: Sticky TOC -->
+      <aside class="meta-sidebar" id="metaSidebar">
+        <div class="sidebar-mini-header">
+          <div class="mini-badge">// NOW_READING</div>
+          <!-- REPLACE: short title for the sticky sidebar -->
+          <div class="mini-title">Article Short Title</div>
+        </div>
+
+        <nav class="toc-container">
+          <span class="toc-label">Contents</span>
+          <!-- REPLACE: keep href="#id" values in sync with <h2 id="..."> in the article -->
+          <ul class="toc-list" id="tocList">
+            <li><a href="#intro" class="toc-link">Introduction</a></li>
+            <li><a href="#section-2" class="toc-link">Section 2</a></li>
+            <li><a href="#section-3" class="toc-link">Section 3</a></li>
+            <li><a href="#section-4" class="toc-link">Section 4</a></li>
+            <li><a href="#summary" class="toc-link">Summary</a></li>
+            <li><a href="#resources" class="toc-link">Official Resources</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- RIGHT COLUMN: Main Article -->
+      <main class="main-column">
+        <div class="article-content">
+
+          <!-- ── INTRO ──────────────────────────────────── -->
+          <!-- REPLACE: opening paragraph — answer "Why now?" -->
+          <p id="intro">
+            <strong>Opening hook.</strong> State the problem or opportunity in concrete terms. Quantify it if possible (e.g., "50% cheaper", "10× faster"). Keep to 3–4 sentences.
+          </p>
+
+          <p>
+            Second paragraph: briefly preview what the reader will take away from this post. End with a concrete claim that creates forward momentum.
+          </p>
+
+          <div class="divider"></div>
+
+          <!-- ── SECTION 2 ──────────────────────────────── -->
+          <!-- REPLACE: fill in all section content below -->
+          <h2 id="section-2">Section 2 Heading</h2>
+
+          <p>
+            Body text goes here. Paragraphs should be 3–4 sentences max.
+          </p>
+
+          <!-- Callout box — use for key insights, design shifts, or warnings -->
+          <div class="callout">
+            <div class="callout-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <!-- REPLACE: callout title -->
+              Key Insight
+            </div>
+            <!-- REPLACE: callout body -->
+            <p style="margin-bottom: 0;">Supporting detail or concrete example that reinforces the section's main claim.</p>
+          </div>
+
+          <!-- ── SECTION 3 ──────────────────────────────── -->
+          <h2 id="section-3">Section 3 Heading</h2>
+
+          <p>Body text.</p>
+
+          <!-- Bulleted list example -->
+          <ul>
+            <li><strong>Point one:</strong> explanation</li>
+            <li><strong>Point two:</strong> explanation</li>
+            <li><strong>Point three:</strong> explanation</li>
+          </ul>
+
+          <!-- Inline code snippet — use <code> inline or .code-block for multi-line -->
+          <div class="code-block">
+            <span class="code-label">// REPLACE: language or context label</span>
+            <code><span class="code-keyword">keyword</span> example code here</code>
+          </div>
+
+          <!-- ── SECTION 4 ──────────────────────────────── -->
+          <h2 id="section-4">Section 4 Heading</h2>
+
+          <p>Body text.</p>
+
+          <!-- Check-list variant — use for "When to use X" or decision guides -->
+          <ul class="check-list">
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>Condition:</strong> explanation
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; position: relative; top: 2px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <strong>Condition:</strong> explanation
+            </li>
+          </ul>
+
+          <!-- ── SUMMARY ─────────────────────────────────── -->
+          <h2 id="summary">Bottom Line</h2>
+
+          <p>
+            Restate the core takeaway in 2–3 sentences. Make it standalone — a reader who skims to here should still grasp the essential idea.
+          </p>
+
+          <ul>
+            <li>Actionable bullet one</li>
+            <li>Actionable bullet two</li>
+            <li>Actionable bullet three</li>
+          </ul>
+
+          <!-- ── OFFICIAL RESOURCES ─────────────────────── -->
+          <h2 id="resources">Official Resources</h2>
+
+          <div class="resources-grid">
+
+            <!-- REPLACE: repeat this block for each reference (3–6 cards typical) -->
+            <a href="REPLACE_URL" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <!-- REPLACE: source name e.g. "Anthropic Official", "VentureBeat" -->
+              <div class="resource-site">Source Name</div>
+              <!-- REPLACE: article headline -->
+              <div class="resource-header">Resource Title</div>
+              <!-- REPLACE: 1–2 sentence description -->
+              <div class="resource-desc">Short description of what this resource covers and why it's worth reading.</div>
+            </a>
+
+            <a href="REPLACE_URL" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">Source Name</div>
+              <div class="resource-header">Resource Title</div>
+              <div class="resource-desc">Short description.</div>
+            </a>
+
+            <a href="REPLACE_URL" target="_blank" rel="noopener noreferrer" class="resource-card">
+              <div class="mini-clip">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                </svg>
+              </div>
+              <div class="resource-site">Source Name</div>
+              <div class="resource-header">Resource Title</div>
+              <div class="resource-desc">Short description.</div>
+            </a>
+
+          </div>
+
+          <!-- ── RECOMMENDATIONS ────────────────────────── -->
+          <section class="recommendations-section">
+            <div class="recommendations-header">
+              <h2>→ Continue Reading</h2>
+            </div>
+
+            <div class="recommendations-grid">
+              <!-- REPLACE: link to a related blog or the homepage -->
+              <a href="../index.html" class="rec-card">
+                <div class="rec-badge">Home</div>
+                <h3>Explore More Topics</h3>
+                <p class="rec-excerpt">
+                  Discover our collection of in-depth technical articles breaking down complex technologies into digestible, visual explanations.
+                </p>
+                <div class="rec-footer">
+                  <div class="rec-meta">
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                      Homepage
+                    </span>
+                  </div>
+                  <div class="rec-btn">Browse All →</div>
+                </div>
+              </a>
+
+              <!-- Add more rec-cards here for related posts -->
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ────────────────────────────────────────── -->
+  <footer class="simple-footer">
+    <div class="footer-content">
+      <a href="https://thejus-m.is-a.dev" class="footer-home-mark" title="Return Home">T</a>
+      <div class="footer-info">
+        <!-- REPLACE: update year if needed -->
+        <span>Bit by Bit Series • 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── MOBILE TOC ─────────────────────────────────────── -->
+  <button id="mobileTocBtn" class="mobile-toc-fab" aria-label="Open Table of Contents" onclick="document.getElementById('mobileTocOverlay').classList.add('active')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <div id="mobileTocOverlay" class="mobile-toc-overlay">
+    <div class="mobile-toc-backdrop" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')"></div>
+    <div class="mobile-toc-sheet" id="mobileTocSheet">
+      <div class="mobile-toc-handle-bar">
+        <div class="mobile-toc-handle"></div>
+      </div>
+      <div class="mobile-toc-header">
+        <div class="mobile-toc-header-text">
+          <span class="mobile-toc-tag">// BIT_BY_BIT_LOG</span>
+          <!-- REPLACE: short article title for mobile sheet header -->
+          <span class="mobile-toc-title-main">Article Short Title</span>
+        </div>
+        <button id="mobileTocClose" class="mobile-toc-close" onclick="document.getElementById('mobileTocOverlay').classList.remove('active')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="mobile-toc-content" id="mobileTocContent">
+        <!-- Injected by blog-common.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Required scripts — keep all three for resource card thumbnails -->
+  <script src="../assets/js/blog-common.js"></script>
+  <script src="../assets/js/resource-cache-data.js"></script>
+  <script src="../assets/js/resource-preview.js"></script>
+  <script src="../assets/js/interactions.js"></script>
+</body>
+</html>
